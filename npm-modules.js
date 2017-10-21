@@ -18,6 +18,8 @@ class NPMModules {
 		}
 
 		const npmls = execa('npm', [ 'ls', '--json' ], {cwd});
+		npmls.stderr.pipe(process.stderr);
+
 		return npmls.then(result => {
 
 			let tree = {};
@@ -76,7 +78,9 @@ class NPMModules {
 
 			return tree;
 
-		}).catch(() => Promise.reject(new Error(`FAILED: ${cwd}/npm ls --json`)));
+		}).catch(issue => {
+			return Promise.reject(new Error(`FAILED: ${cwd}/npm ls --json`))
+		});
 
 	}
 
