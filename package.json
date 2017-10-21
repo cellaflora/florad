@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "adm-zip": "^0.4.7",
+    "ajv": "^5.2.3",
     "aws-sdk": "^2.138.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
