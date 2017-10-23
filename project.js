@@ -32,7 +32,10 @@ class LambdaProject {
 	dependencyTree () {
 
 		debug(`fetching dependencies tree`);
-		return NPMModules.dependencyTree(this.moduleDirectory);
+		return NPMModules.dependencyTree(this.moduleDirectory, true).then(tree => {
+			debug(`fetching dependencies tree finished`);
+			return tree;
+		});
 
 	}
 
