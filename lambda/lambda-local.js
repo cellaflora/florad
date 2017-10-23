@@ -105,10 +105,12 @@ class LambdaLocal extends LambdaAWS {
 		}
 
 		const deployer = new LambdaDeploy(this);
-		return archive.then(() => deployer.deploy({force, useS3})).then(() => {
-			this.archive = null;
-			return this;
-		});
+		return archive
+			.then(() => deployer.deploy({force, useS3}))
+			.then(() => {
+				this.archive = null;
+				return this;
+			});
 
 	}
 

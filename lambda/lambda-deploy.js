@@ -14,7 +14,7 @@ class LambdaDeploy {
 		const lambda = this.lambda;
 		const fetchVersions = lambda.fetchVersions();
 
-		fetchVersions.then(() => {
+		const doDeploy = fetchVersions.then(() => {
 
 			// should we deploy?
 			const isFirstDeploy = lambda.versions.length === 0;
@@ -41,12 +41,13 @@ class LambdaDeploy {
 
 			if (useS3) {
 
+				
 				const stream = fs.createReadStream(lambda.archivePath);
-				return lambda.uploadToS3(stream).then(() =>
-					isFirstDeploy
+				return lambda.uploadToS3(stream).then(() => {
+					return isFirstDeploy
 						? lambda.createFunction()
 						: lambda.updateFunctionCode()
-				);
+				});	
 
 			}
 
@@ -56,7 +57,7 @@ class LambdaDeploy {
 
 		});
 
-		return fetchVersions;
+		return doDeploy;
 
 	}
 

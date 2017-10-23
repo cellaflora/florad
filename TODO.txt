@@ -6,3 +6,23 @@ X> bug: when no node_modules in lambda
 X> check before running node-pre-gyp to see if already on runtime,arch,os
 > tail cloudwatch logs for lambdas and gaitway and combine
 > cli, list projects, list versions, list stages for each
+
+API Gateway
+> fetch lambda by name ON extension
+> create/update lambda with schema using importRestApi/putRestApi ON extension
+
+> update lambda permissions to include associated api-endpoint ON project\
+
+PROJECT BUILD
+1. define project
+2. define lambdas
+3. build lambdas
+4. define api
+
+PROJECT DEPLOY
+5. deploy lambdas
+6. deploy api
+7. add lambda<>gateway permissions
+
+PROJECT PUPBLISH
+8. publish to stage
