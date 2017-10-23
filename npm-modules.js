@@ -11,42 +11,108 @@ const cache = {};
 
 class NPMModules {
 
-	static dependencyTree (cwd) {
+	static dependencyTree (cwd, reuseLock = false) {
 
 		if (cache[cwd]) {
 			return Promise.resolve(cache[cwd]);
 		}
 
-		const npmls = execa('npm', [ 'ls', '--json' ], {cwd});
-		npmls.stderr.pipe(process.stderr);
+		const potentialLockPath = path.resolve(cwd, '../package-lock.json');
+		let npmls = null;
 
-		return npmls.then(result => {
 
-			let tree = {};
-			try { tree = JSON.parse(result.stdout).dependencies; } catch (e) {}
+		if (fs.existsSync(potentialLockPath) && reuseLock) {
+
+			npmls = new Promise((resolve, reject) => {
+				fs.readFile(potentialLockPath, (error, buffer) => {
+					try {
+
+						if (error) {
+							throw error;
+						}
+						resolve(JSON.parse(buffer).dependencies);
+
+					}
+					catch (issue) {
+
+						npmls = execa('npm', [ 'ls', '--json' ], {cwd});
+						npmls.stderr.pipe(process.stderr);
+						npmls = npmls
+							.then(result => JSON.parse(result.stdout).dependencies)
+							.then(resolve)
+							.catch(reject);
+						
+					}
+
+				});
+			});
+
+		}
+		else {
+
+			npmls = execa('npm', [ 'ls', '--json' ], {cwd});
+			npmls.stderr.pipe(process.stderr);
+			npmls = npmls.then(result => JSON.parse(result.stdout).dependencies);
+
+		}
+
+
+		return npmls.then(tree => {
+
+			tree = tree || {};
 			cache[cwd] = tree;
-
 
 			// resolve module paths
 			const allModules = [];
-			const stack = keys(tree).map(module => {
-				tree[module].name = module;
-				tree[module].dependencies = tree[module].dependencies || {};
-				tree[module].path = module;
-				return tree[module];
+			const stack = keys(tree).map(name => {
+
+				const node = tree[name];
+				node.name = name;
+				node.dependencies = node.dependencies || {};
+				node.path = name;
+				keys(node.requires||{}).forEach(required => {
+
+					if (tree[required] &&
+						!node.dependencies.hasOwnProperty(required))
+					{
+						node.dependencies[required] = tree[required];
+					}
+
+				});
+				node._mark = true;
+
+				return node;
 			});
 
 			while (stack.length > 0) {
 
 				const node = stack.shift();
 
-				const children = keys(node.dependencies).map(module => {
-					const child = node.dependencies[module];
-					child.name = module;
-					child.dependencies = child.dependencies || {};
-					child.path = path.join(node.path, module);
-					return child;
-				});
+				const children = keys(node.dependencies)
+					.filter(module => {
+						return !(node.dependencies[module]||{})._mark;
+					})
+					.map(module => {
+
+						const child = node.dependencies[module];
+						child.name = module;
+						child.dependencies = child.dependencies || {};
+						child.path = path.join(node.path, module);
+						keys(child.requires||{}).forEach(required => {
+
+							if (tree[required] &&
+								!child.dependencies.hasOwnProperty(required))
+							{
+								child.dependencies[required] = tree[required];
+							}
+
+						});
+						child._mark = true;
+
+						return child;
+
+					});
+
 				stack.push(...children);
 				allModules.push(node);
 
@@ -79,6 +145,7 @@ class NPMModules {
 			return tree;
 
 		}).catch(issue => {
+			console.error(issue);
 			return Promise.reject(new Error(`FAILED: ${cwd}/npm ls --json`))
 		});
 

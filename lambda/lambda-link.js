@@ -59,6 +59,7 @@ class LambdaLink {
 
 			// npm install
 			fs.writeFileSync(lambda.packagePath, JSON.stringify(npmPackage, null, 4));
+			try { fs.mkdirSync(lambda.modulesDirectory) } catch (issue) {}
 
 			const cwd = lambda.buildDirectory;
 			const npminstall = execa('npm', [ 'i', '--json', '--silent' ], {cwd});
@@ -74,7 +75,7 @@ class LambdaLink {
 		.then(() => {
 
 			debug(`fetching ${lambda.debugName} dependencies tree`);
-			return NPMModules.dependencyTree(lambda.modulesDirectory);
+			return NPMModules.dependencyTree(lambda.modulesDirectory, true);
 
 		})
 		.then(tree => NPMModules.findGypModules(tree))
