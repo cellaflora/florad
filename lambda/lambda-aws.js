@@ -20,7 +20,7 @@ class LambdaAWS {
 
 
 		const lambdaSDK = new AWS.Lambda({
-			apiVersion: '2015-03-31',
+			lambdaSDKVersion: '2015-03-31',
 			credentials: new AWS.SharedIniFileCredentials({profile}),
 			region,
 		});
@@ -71,7 +71,7 @@ class LambdaAWS {
 
 	createFunction (archive) {
 
-		const create = {
+		let create = {
 			Code: {ZipFile: archive},
 			FunctionName: this.name,
 			Handler: `${this.name}.handler`,
@@ -80,6 +80,10 @@ class LambdaAWS {
 			Role: this.configuration.role,
 			Runtime: this.configuration.runtime
 		};
+
+		if (typeof this.prelambda === 'function') {
+			create = this.prelambda(create);
+		}
 
 		debug(`Deploying ${this.debugName}`);
 		return this.lambdaSDK.createFunction(create).promise()

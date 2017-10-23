@@ -10,7 +10,6 @@ const LambdaDeploy = require('./lambda-deploy');
 
 
 
-
 class LambdaLocal extends LambdaAWS {
 
 	constructor (project, params) {
@@ -25,8 +24,16 @@ class LambdaLocal extends LambdaAWS {
 		this.externals = [];
 		this.archive = null;
 
-		this.webpack = typeof this.params === 'function'
-			? this.params
+		this.prewebpack = typeof params.prewebpack === 'function'
+			? params.prewebpack
+			: config => config;
+
+		this.prenpm = typeof params.prenpm === 'function'
+			? params.prenpm
+			: config => config;
+
+		this.prelambda = typeof params.prelambda === 'function'
+			? params.prelambda
 			: config => config;
 
 		this.hasBeenCompiled = false;

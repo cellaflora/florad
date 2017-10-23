@@ -19,6 +19,10 @@ const lambda = new LambdaLocal(project, {
 	path: path.resolve(__dirname, 'helloworld'),
 	runtime: 'nodejs6.10',
 	role: 'arn:aws:iam::339734559946:role/execute_lambda',
+
+	prewebpack: config => config,  // optional
+	prenpm: config => config,  // optional
+	prelambda: config => config,  // optional
 });
 
 lambda.build()
