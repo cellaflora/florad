@@ -23,6 +23,7 @@ class LambdaProject {
 		this.aws = Object.assign({
 			profile: 'default',
 			region: 'us-east-1',
+			deployBucket: null,
 		}, aws);
 
 	}

@@ -1,3 +1,4 @@
+const fs = require('fs');
 const debug = require('debug')('deploy');
 
 
@@ -8,10 +9,10 @@ class LambdaDeploy {
 	}
 
 
-	deploy ({force = false}) {
+	deploy ({force = false, useS3 = false}) {
 
 		const lambda = this.lambda;
-		const fetchVersions = this.lambda.fetchVersions();
+		const fetchVersions = lambda.fetchVersions();
 
 		fetchVersions.then(() => {
 
@@ -35,6 +36,17 @@ class LambdaDeploy {
 					return Promise.resolve(lambda);
 
 				}
+
+			}
+
+			if (useS3) {
+
+				const stream = fs.createReadStream(lambda.archivePath);
+				return lambda.uploadToS3(stream).then(() =>
+					isFirstDeploy
+						? lambda.createFunction()
+						: lambda.updateFunctionCode()
+				);
 
 			}
 

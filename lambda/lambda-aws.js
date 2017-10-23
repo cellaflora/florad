@@ -20,11 +20,19 @@ class LambdaAWS {
 
 
 		const lambdaSDK = new AWS.Lambda({
-			lambdaSDKVersion: '2015-03-31',
+			apiVersion: '2015-03-31',
 			credentials: new AWS.SharedIniFileCredentials({profile}),
 			region,
 		});
 		Object.defineProperty(this, 'lambdaSDK', { get: () => lambdaSDK });
+
+
+		const s3SDK = new AWS.S3({
+			apiVersion: '2006-03-01',
+			credentials: new AWS.SharedIniFileCredentials({profile}),
+			region,
+		});
+		Object.defineProperty(this, 's3SDK', { get: () => s3SDK });
 
 	}
 
@@ -71,6 +79,11 @@ class LambdaAWS {
 
 	createFunction (archive) {
 
+		if (!archive && !this.project.aws.deployBucket) {
+			throw new Error(`To update lambda, you must either provide `+
+				`an archive or define S3 project deploy-bucket!`);
+		}
+
 		let create = {
 			Code: {ZipFile: archive},
 			FunctionName: this.name,
@@ -80,6 +93,15 @@ class LambdaAWS {
 			Role: this.configuration.role,
 			Runtime: this.configuration.runtime
 		};
+
+		if (!archive) {
+
+			const code = create.Code;
+			delete code.ZipFile;
+			code.S3Bucket = this.project.aws.deployBucket;
+			code.S3Key = this.name;
+
+		}
 
 		if (typeof this.prelambda === 'function') {
 			create = this.prelambda(create);
@@ -104,11 +126,24 @@ class LambdaAWS {
 
 	updateFunctionCode (archive) {
 
+		if (!archive && !this.project.aws.deployBucket) {
+			throw new Error(`To update lambda, you must either provide `+
+				`an archive or define S3 project deploy-bucket!`);
+		}
+
 		const update = {
 			FunctionName: this.name,
 			Publish: true,
 			ZipFile: archive,
 		};
+
+		if (!archive) {
+
+			delete update.ZipFile;
+			update.S3Bucket = this.project.aws.deployBucket;
+			update.S3Key = this.name;
+
+		}
 
 		debug(`Deploying ${this.debugName}`);
 
@@ -124,6 +159,27 @@ class LambdaAWS {
 				return this;
 
 			});
+
+	}
+
+
+	uploadToS3 (archive, params = {}) {
+
+		if (!this.project.aws.deployBucket) {
+			throw new Error(`Must define a project deploy-bucket before uploading to S3!`);
+		}
+
+		debug(`Uploading ${this.debugName} to S3`);
+
+		const upload = Object.assign({}, {
+			Bucket: this.project.aws.deployBucket,
+			Key: this.name,
+			Body: archive
+		}, params);
+		return this.s3SDK.upload(upload).promise().then(() => {
+			debug(`Upload ${this.debugName} to S3 finished`);
+			return this;
+		});
 
 	}
 

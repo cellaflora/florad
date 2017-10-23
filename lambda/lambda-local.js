@@ -91,18 +91,21 @@ class LambdaLocal extends LambdaAWS {
 	}
 
 
-	deploy ({force = false} = {force: false}) {
+	deploy (options = {}) {
 
-		let archive = Promise.resolve();
-		if (!this.hasBeenPackaged && fs.existsSync(this.archivePath)) {
-			archive = LambdaPackage.loadPackage(this);
-		}
-		else if (!this.hasBeenPackaged) {
+		const { force, useS3 } = Object.assign({force: false, useS3: false}, options);
+
+		if (!fs.existsSync(this.archivePath)) {
 			throw new Error(`Lambda ${this.debugName} must be packaged first!`);
 		}
 
+		let archive = Promise.resolve();
+		if (!useS3) {
+			archive = LambdaPackage.loadPackage(this);
+		}
+
 		const deployer = new LambdaDeploy(this);
-		return archive.then(() => deployer.deploy({force})).then(() => {
+		return archive.then(() => deployer.deploy({force, useS3})).then(() => {
 			this.archive = null;
 			return this;
 		});

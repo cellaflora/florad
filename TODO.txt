@@ -1,5 +1,7 @@
 XXX> make zipping faster
 XXX> add npm, webpack, and lamba callbacks
-> support upload to S3 for faster deploys
+XXX> support upload to S3 for faster deploys ; didn't make that much of a diff
+> check before running node-pre-gyp to see if already on runtime,arch,os
+> if lockfile use, instead of npm ls; should make things faster
 > tail cloudwatch logs for lambdas and gaitway and combine
 > cli, list projects, list versions, list stages for each
