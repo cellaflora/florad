@@ -1,5 +1,5 @@
-XXX > make zipping faster
-> add npm, webpack, and lamba callbacks
+XXX> make zipping faster
+XXX> add npm, webpack, and lamba callbacks
 > support upload to S3 for faster deploys
 > tail cloudwatch logs for lambdas and gaitway and combine
 > cli, list projects, list versions, list stages for each

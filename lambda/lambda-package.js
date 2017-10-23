@@ -1,4 +1,3 @@
-const Zip = require("adm-zip");
 const constant = new Date('2017-10-17T18:23:35.534Z');
 const crypto = require('crypto');
 const fs = require('fs');

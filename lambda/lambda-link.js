@@ -53,6 +53,10 @@ class LambdaLink {
 
 		return this._npmPackage().then(npmPackage => {
 
+			if (typeof this.lambda.prenpm === 'function') {
+				npmPackage = this.lambda.prenpm(npmPackage);
+			}
+
 			// npm install
 			fs.writeFileSync(lambda.packagePath, JSON.stringify(npmPackage, null, 4));
 

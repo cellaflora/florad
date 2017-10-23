@@ -38,7 +38,11 @@ class LambdaCompiler {
 
 		const isModule = req => /^(\/|\.\/|\.\.\/|.*!)/.exec(req) === null;
 		const externals = {};
-		const config = clone(this.webpackConfig);
+
+		let config = clone(this.webpackConfig);
+		if (typeof this.lambda.prewebpack === 'function') {
+			config = this.lambda.prewebpack(config);
+		}
 		config.externals = clone(this.webpackConfig.externals);
 
 		config.externals.push((context, request, callback) => {
