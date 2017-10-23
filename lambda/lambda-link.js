@@ -2,6 +2,8 @@ const fs = require('fs');
 const execa = require('execa');
 const debug = require('debug')('link');
 const NPMModules = require('../npm-modules');
+const nodePreGYP = require('node-pre-gyp');
+const path = require('path');
 
 
 
@@ -89,15 +91,36 @@ class LambdaLink {
 
 			return Promise.all(gypModules.pregyp.map(module => {
 
+				const cwd = module.path;
+				const target = `${lambda.configuration.runtime.substring(6)}.0`;
+
+				try {
+
+					const objectPath = nodePreGYP.find(path.join(cwd,'package.json'), {
+						runtime: 'node',
+						target,
+						target_platform: 'linux',
+						target_arch: 'x64',
+					});
+
+					if(fs.existsSync(objectPath)) {
+						debug(`${module.name} already compiled (for ${lambda.debugName})`);
+						return Promise.resolve(lambda);
+					}
+
+				}
+				catch (issue) {}
+
+
 				debug(`$node-pre-gyp ${module.name} (for ${lambda.debugName})`);
 
-				const cwd = module.path;
+				
 				const args = [
 					'--verbose', 
 					'install',
 					'--update-binary',
 					'--runtime=node',
-					`--target=${lambda.configuration.runtime.substring(6)}.0`,
+					`--target=${target}`,
 					'--target_platform=linux',
 					'--target_arch=x64',
 				];
