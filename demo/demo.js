@@ -5,7 +5,8 @@ const NPMModules = require('../npm-modules');
 
 
 const aws = {
-	profile: 'cellaflora'
+	profile: 'cellaflora',
+	deployBucket: 'cellaflora-flora'
 };
 
 const project = new Project({ 
@@ -28,6 +29,6 @@ const lambda = new LambdaLocal(project, {
 lambda.build()
 	// .then(() => lambda.link())
 	// .then(() => lambda.package())
-	.then(() => lambda.deploy())
+	.then(() => lambda.deploy({useS3: true}))
 	// .then(console.log)
 	.catch(console.error);

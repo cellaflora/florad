@@ -104,7 +104,7 @@ class LambdaPackage {
 			});
 		});
 
-		return archive.then(() => LambdaPackage.loadPackage(lambda));
+		return archive;
 
 	}
 
