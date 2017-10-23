@@ -3,6 +3,6 @@ X> add npm, webpack, and lamba callbacks
 X> support upload to S3 for faster deploys ; didn't make that much of a diff
 X> if lockfile use, instead of npm ls; should make things faster
 X> bug: when no node_modules in lambda
-> check before running node-pre-gyp to see if already on runtime,arch,os
+X> check before running node-pre-gyp to see if already on runtime,arch,os
 > tail cloudwatch logs for lambdas and gaitway and combine
 > cli, list projects, list versions, list stages for each
