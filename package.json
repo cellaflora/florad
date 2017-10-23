@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.cellaflora.com/internal/flora.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,15 +18,17 @@
     "sqlite3": "^3.1.13"
   },
   "dependencies": {
-    "adm-zip": "^0.4.7",
     "ajv": "^5.2.3",
+    "archiver": "^2.1.0",
     "aws-sdk": "^2.138.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",
     "debug": "^3.1.0",
+    "event-stream": "^3.3.4",
     "execa": "^0.8.0",
     "find": "^0.2.7",
+    "glob": "^7.1.2",
     "lodash": "^4.17.4",
     "node-pre-gyp": "^0.6.38",
     "webpack": "^3.8.1"

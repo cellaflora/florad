@@ -3,6 +3,10 @@ const constant = new Date('2017-10-17T18:23:35.534Z');
 const crypto = require('crypto');
 const fs = require('fs');
 const debug = require('debug')('package');
+const archiver = require('archiver');
+const path = require('path');
+const es = require('event-stream');
+const glob = require('glob');
 
 
 
@@ -13,33 +17,100 @@ class LambdaPackage {
 	}
 
 
+	files () {
+
+		return new Promise((resolve, reject) => {
+			glob('**', {
+				stat: false,
+				dot: true,
+				cwd: this.lambda.buildDirectory,
+			}, (error, files) => {
+				if (error) {
+					reject(error);
+					return;
+				}
+				resolve(files);
+			});
+		});
+
+	}
+
+
 	package () {
 
 		const lambda = this.lambda;
 
 		debug(`archiving ${lambda.debugName} to ${lambda.archivePath}`);
 
-		const zip = new Zip();
-		zip.addLocalFolder(lambda.buildDirectory);
-		zip.getEntries().forEach(e => e.header.time = constant);
+		const archive = this.files().then(files => {
+			return new Promise((resolve, reject) => {
 
-		const shasum = crypto.createHash('sha256');
-		const buffer = zip.toBuffer();
-		shasum.update(buffer);
+				let finished = false;
+				const prefix = path.basename(lambda.buildDirectory);
+				const output = fs.createWriteStream(lambda.archivePath);
+				const archive = archiver('zip', {
+					statConcurrency: 1, // keep archiving determenistic
+					zlib: { level: 9}
+				});
+				const shasum = crypto.createHash('sha256');
 
-		zip.writeZip(lambda.archivePath);
+				archive.pipe(es.mapSync(chunk => {
+					if (Buffer.isBuffer) { shasum.update(chunk) }
+					return chunk;
+				})).pipe(output);
 
-		debug(`archiving ${lambda.debugName} to ${lambda.archivePath} finished`);
+				output.on('close', () => {
+					if (!finished) {
 
-		lambda.version.hash = shasum.digest('base64');
-		lambda.archive = buffer;
+						finished = true;
+						lambda.version.hash = shasum.digest('base64');
+						debug(`archiving ${lambda.debugName} to ${lambda.archivePath} finished`);
+						resolve(lambda);
 
-		return Promise.resolve(lambda);
+					}
+				});
+
+				archive.on('warning', error => {
+
+					if (error.code === 'ENOENT') {
+						console.error(error);
+						return;
+					}
+					finished = true;
+					output.destroy();
+					reject(error);
+
+				});
+
+				archive.on('error', error => {
+
+					finished = true;
+					output.destroy();
+					reject(error);
+
+				});
+
+				files.sort(); // keep archiving determenistic
+				files.forEach(file => {
+					const entry = {
+						name: file,
+						prefix,
+						date: constant, // keep archiving determenistic
+					};
+					archive.file(path.join(lambda.buildDirectory, file), entry);
+				});
+
+				archive.finalize();
+
+			});
+		});
+
+		return archive.then(() => LambdaPackage.loadPackage(lambda));
 
 	}
 
 
-	static loadPackage (lambda) {
+	static loadPackage (lambda, performHash = true) {
 
 		return new Promise((resolve, reject) => {
 
@@ -52,10 +123,12 @@ class LambdaPackage {
 					return;
 				}
 
-				const shasum = crypto.createHash('sha256');
-				shasum.update(buffer);
+				if (performHash) {
+					const shasum = crypto.createHash('sha256');
+					shasum.update(buffer);
+					lambda.version.hash = shasum.digest('base64');
+				}
 
-				lambda.version.hash = shasum.digest('base64');
 				lambda.archive = buffer;
 				resolve(lambda);
 
