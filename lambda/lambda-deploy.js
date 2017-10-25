@@ -41,7 +41,6 @@ class LambdaDeploy {
 
 			if (useS3) {
 
-				
 				const stream = fs.createReadStream(lambda.archivePath);
 				return lambda.uploadToS3(stream).then(() => {
 					return isFirstDeploy

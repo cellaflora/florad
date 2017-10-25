@@ -1,6 +1,7 @@
 const AWS =  require('aws-sdk');
 const pick = require('lodash/pick');
 const debug = require('debug')('lambda');
+const replaceParams = (s, _with) => s.replace(/\{([\s\S]+?)\}/g, _with);
 
 
 
@@ -180,6 +181,36 @@ class LambdaAWS {
 			debug(`Upload ${this.debugName} to S3 finished`);
 			return this;
 		});
+
+	}
+
+
+	addInvokePermission ({method, path, gatewayId, gatewayName}) {
+
+		const {region, account} = this.project.aws;
+		const upperMethod = method.toUpperCase();
+		const methodPath = replaceParams(path, '*');
+		const friendlyPath = replaceParams(path, (m, p) => p).replace(/\//g, '_');
+		const friendlyGatewayNam = gatewayName.replace(/\./g,'_');
+		const friendly = `${friendlyGatewayNam}_${upperMethod}${friendlyPath}`
+		const methodArn =
+			`arn:aws:execute-api:${region}:${account}:${gatewayId}/*/${upperMethod}${methodPath}`;
+
+		const params = {
+			Action: 'lambda:InvokeFunction',
+			FunctionName: this.version.arn,
+			Principal: 'apigateway.amazonaws.com',
+			StatementId: friendly,
+			SourceArn: methodArn,
+		};
+		return this.lambdaSDK.addPermission(params).promise()
+			.then(() => this)
+			.catch(issue => {
+				if (issue.code === 'ResourceConflictException') {
+					return Promise.resolve(this);
+				}
+				return Promise.reject(issue);
+			});
 
 	}
 
