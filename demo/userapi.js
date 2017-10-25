@@ -20,10 +20,12 @@ project.defineLambda({
 	role: 'arn:aws:iam::339734559946:role/execute_lambda',
 });
 const gateway = project.gateway;
+
+
 gateway.get('/users', gateway.lambda('getusers'));
+gateway.get('/users/{userId}', gateway.lambda('getusers'));
 
 
 project.build()
 	.then(() => project.deploy())
-	// .then(() => console.log(JSON.stringify(project.gateway.schema, null, 4)))
 	.catch(console.error);

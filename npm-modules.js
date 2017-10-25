@@ -97,7 +97,7 @@ class NPMModules {
 						const child = node.dependencies[module];
 						child.name = module;
 						child.dependencies = child.dependencies || {};
-						child.path = path.join(node.path, module);
+						child.path = path.join(node.path, 'node_modules', module);
 						keys(child.requires||{}).forEach(required => {
 
 							if (tree[required] &&

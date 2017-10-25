@@ -99,13 +99,13 @@ class LambdaLocal extends LambdaAWS {
 			throw new Error(`Lambda ${this.debugName} must be packaged first!`);
 		}
 
-		let archive = Promise.resolve();
+		let doArchive = Promise.resolve();
 		if (!useS3) {
-			archive = LambdaPackage.loadPackage(this);
+			doArchive = LambdaPackage.loadPackage(this);
 		}
 
 		const deployer = new LambdaDeploy(this);
-		return archive
+		return doArchive
 			.then(() => deployer.deploy({force, useS3}))
 			.then(() => {
 				this.archive = null;

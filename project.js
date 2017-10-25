@@ -4,6 +4,9 @@ const NPMModules = require('./npm-modules');
 const Lambda = require('./lambda');
 const Gateway = require('./gateway');
 const Queue = require('promise-queue');
+const AWS = require('aws-sdk');
+const uuid = require('uuid').v1;
+const fs = require('fs');
 
 
 
@@ -35,14 +38,22 @@ class LambdaProject {
 			profile: 'default',
 			region: 'us-east-1',
 			deployBucket: null,
+			account: null,
 		}, aws);
 
 		this.gatewayName = `${name||this.package.name}-${version||this.package.version}`;
 		this.gatewayVersion = new Date().toJSON(); 
 		this.gateway = new Gateway(this);
+		this.schemaPath = path.resolve(this.buildDirectory, 'api.json');
 
 		this._buildQueue = new Queue(concurency);
 		this._deployQueue = new Queue(concurency);
+
+		this._stsSDK = new AWS.STS({
+			apiVersion: '2011-06-15',
+			credentials: new AWS.SharedIniFileCredentials({profile: this.aws.profile}),
+			region: this.aws.region,
+		});
 
 	}
 
@@ -82,6 +93,54 @@ class LambdaProject {
 	}
 
 
+	fetchAWSAccountNumber () {
+		if (this.aws.account) {
+			return Promise.resolve(this.aws.account);
+		}
+
+		debug('fetching aws account number');
+		return this._stsSDK.getCallerIdentity({}).promise().then(({Account}) => {
+
+			debug('fetching aws account number finished');
+			this.aws.account = Account;
+			return this;
+
+		});
+	}
+
+
+	linkLambdaPermissions () {
+
+		if (!this.gateway.awsId) {
+			throw new Error(`Must deploy gateway before linking lambda permissions!`);
+		}
+
+		return this.fetchAWSAccountNumber().then(() => {
+
+			const permissionsWork = this.gateway.usingLambdas.map(info => {
+
+				const { method, path } = info;
+				const gatewayId = this.gateway.awsId;
+				const gatewayName = this.gatewayName;
+				const debugMethod = method.toUpperCase();
+
+				debug(`${debugMethod} ${path}: give permission to ` +
+					`Lambda ${info.lambda.debugName}`);
+
+				return info.lambda.addInvokePermission({method, path, gatewayId, gatewayName})
+					.then(() => {
+						debug(`${debugMethod} ${path}: give permission to ` +
+							`Lambda ${info.lambda.debugName} finsihed`);
+					});
+
+			});
+			return Promise.all(permissionsWork).then(() => this);
+
+		});
+
+	}
+
+
 	deploy () {
 
 		console.log('DEPLOY LAMBDAS');
@@ -92,14 +151,22 @@ class LambdaProject {
 		return doLambdaDeploy
 			.then(() => {
 				console.log('\nBUILD GATEWAY');
-				return this.gateway.run()
+				return this.gateway
+					.run()
+					.then(schema => {
+						fs.writeFileSync(this.schemaPath, JSON.stringify(schema, null, 4));
+					});
 			})
 			.then(() => {
 				console.log('\nDEPLOY GATEWAY');
 				return this.gateway.deploy();
 			})
 			.then(() => {
-				console.log('');
+				console.log('\nLINKING LAMBDA PERMISSIONS');
+				return this.linkLambdaPermissions();
+			})
+			.then(() => {
+				console.log();
 				return this;
 			});
 

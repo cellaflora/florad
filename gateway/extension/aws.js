@@ -34,7 +34,7 @@ class GatewayAWS {
 
 				});
 
-		}
+		};
 		return run(this.name).then(definition => {
 			if (definition) {
 				this.id = definition.id;
@@ -85,17 +85,17 @@ class GatewayAWS {
 module.exports = (gateway, project) => {
 
 	const gatewayAWS = new GatewayAWS(project);
+
 	gateway.awsId = null;
 	gateway.deploy = function () {
 
+		debug(`${gatewayAWS.name}: fetching definition`);
 		const fetchApi = gatewayAWS.fetchRestApi();
 
-		debug(`${gatewayAWS.name}: fetching definition`);
-
+		
 		const deployApi = fetchApi.then(() => {
 
 			debug(`${gatewayAWS.name}: fetching definition finished`);
-
 			if (!gatewayAWS.id) {
 				debug(`${gatewayAWS.name}: deploying new api`);
 				return gatewayAWS.newRestApi(gateway.schema.document);
@@ -106,9 +106,13 @@ module.exports = (gateway, project) => {
 
 		});
 
+
 		return deployApi.then(() => {
+
 			debug(`${gatewayAWS.name}: has been deployed`);
+			gateway.awsId = gatewayAWS.id;
 			return gateway;
+
 		});
 
 	};
