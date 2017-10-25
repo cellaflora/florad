@@ -1,12 +1,17 @@
 const middleware = require('./middleware');
 const extensions = require('./extension');
 const swagger = require('./swagger');
+const debug = require('debug')('gateway');
 
 
 
 class Gateway {
 
-	constructor (title, version, patch = []) {
+	constructor (project, patch = []) {
+
+		this.project = project;
+		const title = project.gatewayName;
+		const version = project.gatewayVersion;
 
 		this.middleware = middleware.slice();
 
@@ -15,7 +20,7 @@ class Gateway {
 			paths: new swagger.Paths(),
 		});
 
-		extensions.concat(patch).forEach(ext => ext(this));
+		extensions.concat(patch).forEach(ext => ext(this, project));
 
 		this.programs = [];
 
@@ -92,6 +97,7 @@ class Gateway {
 					return;
 				}
 
+				debug(`${method.toUpperCase()} ${path}`);
 				resolve();
 
 			}))();
