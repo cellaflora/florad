@@ -8,14 +8,15 @@ X> check before running node-pre-gyp to see if already on runtime,arch,os
 > cli, list projects, list versions, list stages for each
 
 API Gateway
-> fetch lambda by name ON extension
-> create/update lambda with schema using importRestApi/putRestApi ON extension
-
+X> fetch lambda by name
+X> create/update lambda with schema using importRestApi/putRestApi ON extension
 > update lambda permissions to include associated api-endpoint ON project
 
 > change the middleware errors to include the middleware name in error
 > move lambda debugName to front of debug lines
 > add enviroment and template replacement to gateway.extention, lambda definition, and webpack
+
+> add publish to stage
 
 PROJECT BUILD
 1. define project
