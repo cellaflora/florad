@@ -10,7 +10,7 @@ module.exports = (gateway, project) => {
 	gateway.lambda = name => {
 		return (req, res)  => {
 
-			const lambda = project.lambdas.filter(l => l.name === name).pop();
+			const lambda = project.lambdas.find(l => l.name === name);
 			if (!lambda) {
 				throw new MiddlewareError('lambda', name, req)
 			}

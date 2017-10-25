@@ -4,6 +4,7 @@ const Project = require('../project');
 const Gateway = require('../gateway');
 const Lambda = require('../Lambda');
 
+
 const project = new Project({ 
 	name: 'GatewayTest',
 	projectDirectory: path.resolve(__dirname, '..'),
@@ -11,25 +12,18 @@ const project = new Project({
 	aws: { profile: 'cellaflora' },
 });
 
-defineLambdas(project);
-defineGateway(project.gateway);
+
+project.defineLambda({
+	name: 'getusers',
+	path: path.resolve(__dirname, 'getusers'),
+	runtime: 'nodejs6.10',
+	role: 'arn:aws:iam::339734559946:role/execute_lambda',
+});
+const gateway = project.gateway;
+gateway.get('/users', gateway.lambda('getusers'));
+
 
 project.build()
 	.then(() => project.deploy())
-	// .then(console.log)
+	// .then(() => console.log(JSON.stringify(project.gateway.schema, null, 4)))
 	.catch(console.error);
-
-function defineLambdas(project) {
-
-	project.defineLambda({
-		name: 'getusers',
-		path: path.resolve(__dirname, 'getusers'),
-		runtime: 'nodejs6.10',
-		role: 'arn:aws:iam::339734559946:role/execute_lambda',
-	});
-
-}
-
-function defineGateway(gateway) {
-	gateway.get('/users', gateway.lambda('getusers'));
-}

@@ -10,7 +10,8 @@ const Queue = require('promise-queue');
 class LambdaProject {
 
 	constructor ({
-		name,
+		name = null,
+		version = null,
 		projectDirectory,
 		buildDirectory,
 		aws = {},
@@ -36,7 +37,7 @@ class LambdaProject {
 			deployBucket: null,
 		}, aws);
 
-		this.gatewayName = `${name}-${this.package.version}`;
+		this.gatewayName = `${name||this.package.name}-${version||this.package.version}`;
 		this.gatewayVersion = new Date().toJSON(); 
 		this.gateway = new Gateway(this);
 
@@ -95,7 +96,7 @@ class LambdaProject {
 			})
 			.then(() => {
 				console.log('\nDEPLOY GATEWAY');
-				debug('something will happen here');
+				return this.gateway.deploy();
 			})
 			.then(() => {
 				console.log('');
