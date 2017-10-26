@@ -1,8 +1,6 @@
 TODO
 
 Release 1
-> add standard templates, especially for Lambda proxies (i.e. sv)
-> add environment support to gateway.extention, lambda definition, and webpack
 > change middleware erros to include the middleware name in error
 > move lambda debugName to start of debug line
 

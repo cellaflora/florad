@@ -41,7 +41,7 @@ class LambdaProject {
 			account: null,
 		}, aws);
 
-		this.gatewayName = `${name||this.package.name}-${version||this.package.version}`;
+		this.gatewayName = `${name||this.package.name}-v${version||this.package.version}`;
 		this.gatewayVersion = new Date().toJSON(); 
 		this.gateway = new Gateway(this);
 		this.schemaPath = path.resolve(this.buildDirectory, 'api.json');

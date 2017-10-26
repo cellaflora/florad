@@ -6,7 +6,7 @@ const Lambda = require('../Lambda');
 
 
 const project = new Project({ 
-	name: 'GatewayTest',
+	name: 'gatewaytest',
 	projectDirectory: path.resolve(__dirname, '..'),
 	buildDirectory: path.resolve(__dirname, 'build'),
 	aws: { profile: 'cellaflora' },

@@ -31,7 +31,7 @@ module.exports = (gateway, project) => {
 				lambda
 			};
 
-			req.when('application/json').accepts({ template: '#/templates/mock' });
+			req.when('application/json').accepts({ template: '#/templates/passthrough' });
 			req.integrates({
 				type: gateway.constants.Lambda,
 				uri: uri(lambda.project.aws.region, arn),
