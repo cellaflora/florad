@@ -22,12 +22,13 @@ class LambdaProject {
 	{
 
 		Object.assign(this, {projectDirectory, buildDirectory});
-		this.name = name;
 		this.moduleDirectory = path.resolve(this.projectDirectory, 'node_modules');
 		this.muduleBinDirectory = path.resolve(this.moduleDirectory, '.bin');
 		this.packagePath = path.resolve(this.projectDirectory, 'package.json');
 		this.package = require(this.packagePath);
 		this._cache = {};
+
+		this.name = name || this.package.name;
 
 		this.version = this.package.version;
 		this.repository = this.package.repository;
@@ -67,11 +68,6 @@ class LambdaProject {
 			return tree;
 		});
 
-	}
-
-
-	npmWhichBin (command) {
-		return path.resolve(path.resolve(this.muduleBinDirectory, command));
 	}
 
 
@@ -148,6 +144,13 @@ class LambdaProject {
 		const lambdas = this.lambdas;
 		const queue = this._buildQueue;
 		const doLambdaDeploy = Promise.all(lambdas.map(l => queue.add(() => l.deploy())));
+
+		if (this.gateway.isEmpty) {
+			return Promise.resolve(this);
+		}
+
+		console.log('>>>', this.gateway);
+		process.exit(0);
 
 		return doLambdaDeploy
 			.then(() => {

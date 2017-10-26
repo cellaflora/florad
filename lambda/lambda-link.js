@@ -125,7 +125,8 @@ class LambdaLink {
 					'--target_arch=x64',
 				];
 
-				const exe = lambda.project.npmWhichBin('node-pre-gyp');
+				const exe = path.resolve(require.resolve('node-pre-gyp'),
+					'../../bin/node-pre-gyp');
 				const nodePreGyp = execa(exe, args, {cwd});
 
 				return nodePreGyp.then(result => {
@@ -135,7 +136,7 @@ class LambdaLink {
 
 				})
 				.catch(error => {
-
+					
 					console.error(`Warning: $node-pre-gyp ${args.join(' ')} ` +
 						`(cwd:${cwd}) FAILED`);
 					console.error(`Warning: ${module.name} has no pre-gyp archive ` + 

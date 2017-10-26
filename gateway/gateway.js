@@ -33,6 +33,8 @@ class Gateway {
 		this.patch   = this.PATCH   = this.method.bind(this, 'patch');
 		this.trace   = this.TRACE   = this.method.bind(this, 'trace');
 
+		Object.defineProperty(this, 'isEmpty', {get: () => this.programs.length === 0});
+
 	}
 
 

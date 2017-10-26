@@ -1,0 +1,16 @@
+{
+  "name": "compilied-lambda",
+  "version": "0.0.0",
+  "description": "",
+  "main": "lambda-deploy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "bluetooth-serial-port": "^2.1.5",
+    "chalk": "^2.3.0",
+    "sqlite3": "^3.1.13"
+  }
+}
