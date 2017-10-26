@@ -1,8 +1,4 @@
 TODO
-
-Release 1
-> create demo projects and export gateway and lambda to <root>/flora.js
-
-Release 2
+> do some preflight checking of project and lambda initialization params
 > add tail cloudwatch logs for both lambda and gaitway and intelegently combine
 > cli, list projects, list versions, list stages for each
