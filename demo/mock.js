@@ -1,6 +1,16 @@
 const Gateway = require('../gateway');
+const Project = require('../Project');
+const path = require('path');
 
-gateway = new Gateway('GatewayTest', new Date().toJSON());
+
+const project = new Project({ 
+	name: 'gatewaytest',
+	projectDirectory: path.resolve(__dirname, '..'),
+	buildDirectory: path.resolve(__dirname, 'build'),
+	aws: { profile: 'cellaflora' },
+});
+
+gateway = new Gateway(project);
 
 
 const mock = template => (req, res) => {
@@ -12,7 +22,7 @@ const mock = template => (req, res) => {
 	res.when('default').responds({
 		status: 200,
 		templates: {
-			'application/json': gateway.inlineTemplate(template)
+			'application/json': gateway.inlineJSONTemplate(template)
 		},
 		model: gateway.inlineModel({type: 'object', title: 'Empty Schema'}),
 	});
