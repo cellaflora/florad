@@ -1,6 +1,6 @@
 const fs = require('fs');
 const execa = require('execa');
-const debug = require('debug')('link');
+const debug = require('../debug')('link');
 const NPMModules = require('../npm-modules');
 const nodePreGYP = require('node-pre-gyp');
 const path = require('path');
@@ -26,7 +26,7 @@ class LambdaLink {
 
 				const version = (dtree[module]||{version:null}).version;
 				dependencies[module] = version;
-				debug(`${lambda.debugName} will use ${module}@${version}`);
+				debug(`${lambda.debugName}: use ${module}@${version}`);
 
 			});
 
@@ -66,9 +66,9 @@ class LambdaLink {
 			const cwd = lambda.buildDirectory;
 			const npminstall = execa('npm', [ 'i', '--json', '--silent' ], {cwd});
 
-			debug(`$npm install (for ${lambda.debugName})`);
+			debug(`${lambda.debugName}: $npm install`);
 			return npminstall.then(() => {
-				debug(`$npm install (for ${lambda.debugName}) finished`);
+				debug(`${lambda.debugName}: $npm install finished`);
 				return lambda;
 			})
 			.catch(() => Promise.reject(new Error(`FAILED: ${cwd}/npm i --json --silent`)));
@@ -76,7 +76,7 @@ class LambdaLink {
 		})
 		.then(() => {
 
-			debug(`fetching ${lambda.debugName} dependencies tree`);
+			debug(`${lambda.debugName}: fetching dependencies tree`);
 			return NPMModules.dependencyTree(lambda.modulesDirectory, true);
 
 		})
@@ -104,7 +104,7 @@ class LambdaLink {
 					});
 
 					if(fs.existsSync(objectPath)) {
-						debug(`${module.name} already compiled (for ${lambda.debugName})`);
+						debug(`${lambda.debugName}: ${module.name} already compiled`);
 						return Promise.resolve(lambda);
 					}
 
@@ -112,7 +112,7 @@ class LambdaLink {
 				catch (issue) {}
 
 
-				debug(`$node-pre-gyp ${module.name} (for ${lambda.debugName})`);
+				debug(`${lambda.debugName}: $node-pre-gyp ${module.name}`);
 
 				
 				const args = [
@@ -130,7 +130,7 @@ class LambdaLink {
 
 				return nodePreGyp.then(result => {
 
-					debug(`$node-pre-gyp ${module.name} (for ${lambda.debugName}) finished`);
+					debug(`${lambda.debugName}: $node-pre-gyp ${module.name} finished`);
 					return lambda;
 
 				})

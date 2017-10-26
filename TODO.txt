@@ -1,8 +1,7 @@
 TODO
 
 Release 1
-> change middleware erros to include the middleware name in error
-> move lambda debugName to start of debug line
+> create demo projects and export gateway and lambda to <root>/flora.js
 
 Release 2
 > add tail cloudwatch logs for both lambda and gaitway and intelegently combine

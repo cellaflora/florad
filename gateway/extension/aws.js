@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-const debug = require('debug')('gateway');
+const debug = require('../../debug')('gateway');
 
 
 

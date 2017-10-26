@@ -1,7 +1,7 @@
 const middleware = require('./middleware');
 const extensions = require('./extension');
 const swagger = require('./swagger');
-const debug = require('debug')('gateway');
+const debug = require('../debug')('gateway');
 
 
 
@@ -97,7 +97,7 @@ class Gateway {
 					return;
 				}
 
-				debug(`${method.toUpperCase()} ${path}`);
+				debug(`${this.project.gatewayName}: ${method.toUpperCase()} ${path}`);
 				resolve();
 
 			}))();

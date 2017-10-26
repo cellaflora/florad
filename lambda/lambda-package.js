@@ -1,7 +1,7 @@
 const constant = new Date('2017-10-17T18:23:35.534Z');
 const crypto = require('crypto');
 const fs = require('fs');
-const debug = require('debug')('package');
+const debug = require('../debug')('package');
 const archiver = require('archiver');
 const path = require('path');
 const es = require('event-stream');
@@ -39,7 +39,7 @@ class LambdaPackage {
 
 		const lambda = this.lambda;
 
-		debug(`archiving ${lambda.debugName} to ${lambda.archivePath}`);
+		debug(`${lambda.debugName}: archiving to ${lambda.archivePath}`);
 
 		const archive = this.files().then(files => {
 			return new Promise((resolve, reject) => {
@@ -63,7 +63,7 @@ class LambdaPackage {
 
 						finished = true;
 						lambda.version.hash = shasum.digest('base64');
-						debug(`archiving ${lambda.debugName} to ${lambda.archivePath} finished`);
+						debug(`${lambda.debugName}: archiving to ${lambda.archivePath} finished`);
 						resolve(lambda);
 
 					}
@@ -113,10 +113,10 @@ class LambdaPackage {
 
 		return new Promise((resolve, reject) => {
 
-			debug(`loading ${lambda.archivePath} for ${lambda.debugName}`);
+			debug(`${lambda.debugName}: loading ${lambda.archivePath}`);
 			fs.readFile(lambda.archivePath, (error, buffer) => {
 
-				debug(`loading ${lambda.archivePath} for ${lambda.debugName} finished`);
+				debug(`${lambda.debugName}: loading ${lambda.archivePath} finished`);
 				if (error) {
 					reject(error);
 					return;
