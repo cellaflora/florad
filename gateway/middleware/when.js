@@ -66,7 +66,7 @@ module.exports = function headers (req, res) {
 	const responds = (condition, definition) => {
 
 		if (!('status' in definition)) {
-			throw new MiddlewareError('definition.status', '', req);
+			throw new MiddlewareError('when.responds.status', '', req);
 		}
 
 		if (conditionToStatus.hasOwnProperty(condition) &&
@@ -95,7 +95,7 @@ module.exports = function headers (req, res) {
 		forEach(definition.templates, (template, contentType) => {
 
 			if (!this.hasTemplate(template)) {
-				throw new MiddlewareError('template', template, req);
+				throw new MiddlewareError('when.responds.template', template, req);
 			}
 
 			integrationResponse.setResponseTemplates(contentType, this.template(template));
@@ -113,7 +113,7 @@ module.exports = function headers (req, res) {
 		if ('model' in definition) {
 
 			if (!this.hasModel(definition.model)) {
-				throw new MiddlewareError('model', definition.model, req);
+				throw new MiddlewareError('when.responds.model', definition.model, req);
 			}
 
 			response.schema = Schema.WithRef(definition.model);

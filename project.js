@@ -1,5 +1,5 @@
 const path = require('path');
-const debug = require('debug')('project');
+const debug = require('./debug')('project');
 const NPMModules = require('./npm-modules');
 const Lambda = require('./lambda');
 const Gateway = require('./gateway');
@@ -22,6 +22,7 @@ class LambdaProject {
 	{
 
 		Object.assign(this, {projectDirectory, buildDirectory});
+		this.name = name;
 		this.moduleDirectory = path.resolve(this.projectDirectory, 'node_modules');
 		this.muduleBinDirectory = path.resolve(this.moduleDirectory, '.bin');
 		this.packagePath = path.resolve(this.projectDirectory, 'package.json');
@@ -60,9 +61,9 @@ class LambdaProject {
 
 	dependencyTree () {
 
-		debug(`fetching dependencies tree`);
+		debug(`${this.name}: fetching dependencies tree`);
 		return NPMModules.dependencyTree(this.moduleDirectory, true).then(tree => {
-			debug(`fetching dependencies tree finished`);
+			debug(`${this.name}: fetching dependencies tree finished`);
 			return tree;
 		});
 
@@ -98,10 +99,10 @@ class LambdaProject {
 			return Promise.resolve(this.aws.account);
 		}
 
-		debug('fetching aws account number');
+		debug(`${this.name}: fetching aws account number`);
 		return this._stsSDK.getCallerIdentity({}).promise().then(({Account}) => {
 
-			debug('fetching aws account number finished');
+			debug(`${this.name}: fetching aws account number finished`);
 			this.aws.account = Account;
 			return this;
 
@@ -124,12 +125,12 @@ class LambdaProject {
 				const gatewayName = this.gatewayName;
 				const debugMethod = method.toUpperCase();
 
-				debug(`${debugMethod} ${path}: give permission to ` +
+				debug(`${this.name}: ${debugMethod} ${path}: give permission to ` +
 					`Lambda ${info.lambda.debugName}`);
 
 				return info.lambda.addInvokePermission({method, path, gatewayId, gatewayName})
 					.then(() => {
-						debug(`${debugMethod} ${path}: give permission to ` +
+						debug(`${this.name}: ${debugMethod} ${path}: give permission to ` +
 							`Lambda ${info.lambda.debugName} finsihed`);
 					});
 

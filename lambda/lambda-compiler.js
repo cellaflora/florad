@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const keys = require('lodash/keys');
 const clone = require('lodash/clone');
-const debug = require('debug')('compiler');
+const debug = require('../debug')('compiler');
 
 
 
@@ -49,7 +49,7 @@ class LambdaCompiler {
 
 				if (isModule(request)) {
 
-					debug(`found external '${request}' durring ${this.lambda.debugName} build`);
+					debug(`${this.lambda.debugName}: found external '${request}' durring build`);
 					externals[request] = null;
 					return callback(null, request);
 
@@ -61,10 +61,10 @@ class LambdaCompiler {
 		const compiler = new webpack(config);
 		return new Promise((resolve, reject) => {
 
-			debug(`building lambda ${this.lambda.debugName} (${this.lambda.path})`);
+			debug(`${this.lambda.debugName}: building lambda (${this.lambda.path})`);
 			compiler.run((error, stats) => {
 
-				debug(`finished lambda ${this.lambda.debugName}`);
+				debug(`${this.lambda.debugName}: finished lambda`);
 				if (error) {
 					reject(error);
 					return;

@@ -26,7 +26,7 @@ module.exports = function (req, res) {
 					if (definition.type === constants.Lambda) {
 
 						if (!definition.hasOwnProperty('uri')) {
-							throw new MiddlewareError('definition.uri', '', req)
+							throw new MiddlewareError('integration.uri', '', req)
 						}
 
 						integration.type = constants.AWS;
@@ -37,11 +37,11 @@ module.exports = function (req, res) {
 					}
 
 					if (!definition.hasOwnProperty('httpMethod')) {
-						throw new MiddlewareError('definition.httpMethod', '', req)
+						throw new MiddlewareError('integration.httpMethod', '', req)
 					}
 
 					if (!definition.hasOwnProperty('uri')) {
-						throw new MiddlewareError('definition.uri', '', req)
+						throw new MiddlewareError('integration.uri', '', req)
 					}
 
 					integration.type = definition.type;

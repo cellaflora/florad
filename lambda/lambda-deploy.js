@@ -1,5 +1,5 @@
 const fs = require('fs');
-const debug = require('debug')('deploy');
+const debug = require('../debug')('deploy');
 
 
 class LambdaDeploy {
@@ -31,8 +31,8 @@ class LambdaDeploy {
 
 				if (!isNewiest) {
 
-					debug(`found previous versions of ${lambda.debugName}`);
-					debug(`skipping ${lambda.debugName} deploy (${lambda.version.arn})`);
+					debug(`${lambda.debugName}: found previous versions`);
+					debug(`${lambda.debugName}: skipping deploy (${lambda.version.arn})`);
 					return Promise.resolve(lambda);
 
 				}

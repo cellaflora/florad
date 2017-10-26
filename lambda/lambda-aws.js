@@ -1,6 +1,6 @@
 const AWS =  require('aws-sdk');
 const pick = require('lodash/pick');
-const debug = require('debug')('lambda');
+const debug = require('../debug')('lambda');
 const replaceParams = (s, _with) => s.replace(/\{([\s\S]+?)\}/g, _with);
 
 
@@ -65,10 +65,10 @@ class LambdaAWS {
 
 		}
 
-		debug(`fetch previous versions of ${this.debugName}`);
+		debug(`${this.debugName}: fetch previous versions`);
 		return run(this.name).then(versions => {
 
-			debug(`fetch previous versions of ${this.debugName} finshed`);
+			debug(`${this.debugName}: fetch previous versions finshed`);
 			this._hasFetchedVersions = true;
 			this.versions = versions;
 			return this;
@@ -108,11 +108,11 @@ class LambdaAWS {
 			create = this.prelambda(create);
 		}
 
-		debug(`Deploying ${this.debugName}`);
+		debug(`${this.debugName}: deploying`);
 		return this.lambdaSDK.createFunction(create).promise()
 			.then(({FunctionArn, CodeSha256, LastModified}) => {
 
-				debug(`Lambda ${this.debugName} has been deployed (${FunctionArn})`);
+				debug(`${this.debugName}: has been deployed (${FunctionArn})`);
 				this.version = {
 					arn: FunctionArn,
 					hash: CodeSha256,
@@ -146,12 +146,12 @@ class LambdaAWS {
 
 		}
 
-		debug(`Deploying ${this.debugName}`);
+		debug(`${this.debugName}: deploying`);
 
 		return this.lambdaSDK.updateFunctionCode(update).promise()
 			.then(({FunctionArn, CodeSha256, LastModified}) => {
 
-				debug(`Lambda ${this.debugName} has been deployed (${FunctionArn})`);
+				debug(`${this.debugName}: has been deployed (${FunctionArn})`);
 				this.version = {
 					arn: FunctionArn,
 					hash: CodeSha256,
@@ -170,7 +170,7 @@ class LambdaAWS {
 			throw new Error(`Must define a project deploy-bucket before uploading to S3!`);
 		}
 
-		debug(`Uploading ${this.debugName} to S3`);
+		debug(`${this.debugName}: uploading to S3`);
 
 		const upload = Object.assign({}, {
 			Bucket: this.project.aws.deployBucket,
@@ -178,7 +178,7 @@ class LambdaAWS {
 			Body: archive
 		}, params);
 		return this.s3SDK.upload(upload).promise().then(() => {
-			debug(`Upload ${this.debugName} to S3 finished`);
+			debug(`${this.debugName}: upload to S3 finished`);
 			return this;
 		});
 
