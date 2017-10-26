@@ -12,13 +12,8 @@
   },
   "author": "Cellaflora (jacob@cellaflora.com)",
   "license": "UNLICENSED",
-  "devDependencies": {
-    "bluetooth-serial-port": "^2.1.5",
-    "chalk": "^2.2.0",
-    "sqlite3": "^3.1.13"
-  },
+  "devDependencies": {},
   "dependencies": {
-    "ajv": "^5.2.3",
     "archiver": "^2.1.0",
     "aws-sdk": "^2.138.0",
     "babel-core": "^6.26.0",

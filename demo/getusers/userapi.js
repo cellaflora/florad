@@ -1,13 +1,14 @@
+if (!process.env.DEBUG) {
+	process.env.DEBUG = 'compiler,link,project,package,lambda,deploy,gateway,gateway-aws';
+}
+
 const path = require('path');
-const AWS = require('aws-sdk');
-const Project = require('../project');
-const Gateway = require('../gateway');
-const Lambda = require('../Lambda');
+const Project = require('../../project');
 
 
 const project = new Project({ 
 	name: 'gatewaytest',
-	projectDirectory: path.resolve(__dirname, '..'),
+	projectDirectory: __dirname,
 	buildDirectory: path.resolve(__dirname, 'build'),
 	aws: { profile: 'cellaflora' },
 });
