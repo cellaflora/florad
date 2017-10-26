@@ -21,6 +21,10 @@ class GatewayAWS {
 
 	fetchRestApi () {
 
+		if (this.id) {
+			return Promise.resolve(this);
+		}
+
 		const run = (name, position = null) => {
 
 			return this.gatewaySDK.getRestApis({position}).promise()
@@ -63,19 +67,51 @@ class GatewayAWS {
 
 	updateRestApi (schema) {
 
+		const doFetch = this.fetchRestApi();
+
 		const params = {
 			body: new Buffer(JSON.stringify(schema)),
 			restApiId: this.id,
 			failOnWarnings: true,
 			mode: 'overwrite'
 		};
-		return this.gatewaySDK.putRestApi(params)
-			.promise()
-			.then(definition => {
-				this.id = definition.id;
-				return this;
-			});;
+		return doFetch.then(() =>
+			this.gatewaySDK.putRestApi(params)
+				.promise()
+				.then(definition => {
+					this.id = definition.id;
+					return this;
+				})
+		);
 
+	}
+
+
+	publish (stage) {
+
+		const doFetch = this.fetchRestApi();
+
+		const params = {
+			restApiId: this.id,
+			stageName: stage,
+			stageDescription: `Stage ${stage}`,
+		};
+		return doFetch.then(() =>
+			this.gatewaySDK.createDeployment(params)
+				.promise()
+				.then(stuff => {
+					return this;
+				})
+		);
+
+	}
+
+
+	stageURL (stage) {
+		return this.fetchRestApi().then(() => {
+			const region = this.project.aws.region;
+			return `https://${this.id}.execute-api.${region}.amazonaws.com/${stage}`;
+		});
 	}
 
 }
@@ -87,6 +123,7 @@ module.exports = (gateway, project) => {
 	const gatewayAWS = new GatewayAWS(project);
 
 	gateway.awsId = null;
+
 	gateway.deploy = function () {
 
 		debug(`${gatewayAWS.name}: fetching definition`);
@@ -114,6 +151,20 @@ module.exports = (gateway, project) => {
 			return gateway;
 
 		});
+
+	};
+
+	gateway.publish = function (stage) {
+
+		debug(`${gatewayAWS.name}: publishing to ${stage}`);
+		return gatewayAWS.publish(stage)
+			.then(() => gatewayAWS.stageURL(stage))
+			.then(uri => {
+
+				debug(`${gatewayAWS.name}: has been published (${uri})`);
+				return gateway;
+
+			});
 
 	};
 

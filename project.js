@@ -172,6 +172,17 @@ class LambdaProject {
 
 	}
 
+
+	publish (stage) {
+
+		console.log(`PUBLISHING GATEWAY`);
+		return this.gateway.publish(stage).then(() => {
+			console.log();			
+			return this;
+		});
+
+	}
+
 }
 
 

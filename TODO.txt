@@ -1,7 +1,6 @@
 TODO
 
 Release 1
-> add pulbish to stage
 > add standard templates, especially for Lambda proxies (i.e. sv)
 > add environment support to gateway.extention, lambda definition, and webpack
 > change middleware erros to include the middleware name in error
