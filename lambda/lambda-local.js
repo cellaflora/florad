@@ -23,6 +23,7 @@ class LambdaLocal extends LambdaAWS {
 		this.archivePath = path.resolve(this.project.buildDirectory, `${this.name}.zip`);
 		this.externals = [];
 		this.archive = null;
+		this.environment = {};
 
 		this.prewebpack = typeof params.prewebpack === 'function'
 			? params.prewebpack
@@ -43,10 +44,20 @@ class LambdaLocal extends LambdaAWS {
 	}
 
 
+	configure () {
+		return this.project.configure().then(config => {
+			Object.assign(this.configuration, config.defaults.lambda);
+			Object.assign(this.environment, config.environment);
+		});
+	}
+
+
 	compile () {
 
-		const compliler = new LambdaCompiler(this);
-		return compliler.run().then(() => {
+		const doConfig = this.configure();
+		const compiler = new LambdaCompiler(this);
+
+		return doConfig.then(() => compiler.run()).then(() => {
 			this.hasBeenCompiled = true;
 			return this;
 		});
@@ -104,8 +115,10 @@ class LambdaLocal extends LambdaAWS {
 			doArchive = LambdaPackage.loadPackage(this);
 		}
 
+		const doConfig = doArchive.then(() => this.configure());
+
 		const deployer = new LambdaDeploy(this);
-		return doArchive
+		return doConfig
 			.then(() => deployer.deploy({force, useS3}))
 			.then(() => {
 				this.archive = null;

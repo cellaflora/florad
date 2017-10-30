@@ -18,6 +18,7 @@ exports.handler = (event, context, callback) => {
 		statusCode: 200,
 		payload: {
 			users: ['rob@cellaflora.com', 'jacob@cellaflora.com', 'brad@cellaflora.com'].filter(filter),
+			db: DATABASE_HOST,
 		},
 	});
 	

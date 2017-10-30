@@ -44,6 +44,7 @@ class LambdaCompiler {
 			config = this.lambda.prewebpack(config);
 		}
 		config.externals = clone(this.webpackConfig.externals);
+		config.plugins = clone(this.webpackConfig.plugins);
 
 		config.externals.push((context, request, callback) => {
 
@@ -57,6 +58,15 @@ class LambdaCompiler {
 				return callback();
 
 		});
+
+		const env = this.lambda.environment;
+		keys(env).forEach(name => {
+
+			env[name] = JSON.stringify(env[name]);
+			debug(`${this.lambda.debugName}: define ${name}=${env[name]}`);
+
+		});
+		config.plugins.push(new webpack.DefinePlugin(env))
 
 		const compiler = new webpack(config);
 		return new Promise((resolve, reject) => {

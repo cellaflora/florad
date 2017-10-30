@@ -1,16 +1,16 @@
+const ProjectAWS = require('./project-aws');
 const path = require('path');
 const debug = require('./debug')('project');
 const NPMModules = require('./npm-modules');
 const Lambda = require('./lambda');
 const Gateway = require('./gateway');
 const Queue = require('promise-queue');
-const AWS = require('aws-sdk');
 const uuid = require('uuid').v1;
 const fs = require('fs');
 
 
 
-class LambdaProject {
+class LambdaProject extends ProjectAWS {
 
 	constructor ({
 		name = null,
@@ -20,42 +20,34 @@ class LambdaProject {
 		aws = {},
 		concurency = 4})
 	{
+		const packagePath = path.resolve(projectDirectory, 'package.json');
+		const packageJson = require(packagePath);
+
+		super(name || packageJson.name, aws);
 
 		Object.assign(this, {projectDirectory, buildDirectory});
 		this.moduleDirectory = path.resolve(this.projectDirectory, 'node_modules');
 		this.muduleBinDirectory = path.resolve(this.moduleDirectory, '.bin');
-		this.packagePath = path.resolve(this.projectDirectory, 'package.json');
-		this.package = require(this.packagePath);
-		this._cache = {};
-
-		this.name = name || this.package.name;
-
+		this.packagePath = packagePath;
+		this.package = packageJson;
+		
 		this.version = this.package.version;
 		this.repository = this.package.repository;
 		this.author = this.package.author;
 		this.license = this.package.license;
 		this.lambdas = [];
 
-		this.aws = Object.assign({
-			profile: 'default',
-			region: 'us-east-1',
-			deployBucket: null,
-			account: null,
-		}, aws);
-
 		this.gatewayName = `${name||this.package.name}-v${version||this.package.version}`;
 		this.gatewayVersion = new Date().toJSON(); 
 		this.gateway = new Gateway(this);
 		this.schemaPath = path.resolve(this.buildDirectory, 'api.json');
 
+		this._cache = {};
 		this._buildQueue = new Queue(concurency);
 		this._deployQueue = new Queue(concurency);
 
-		this._stsSDK = new AWS.STS({
-			apiVersion: '2011-06-15',
-			credentials: new AWS.SharedIniFileCredentials({profile: this.aws.profile}),
-			region: this.aws.region,
-		});
+		this._hasFetchedConfig = false;
+		this.config = new _Config();
 
 	}
 
@@ -76,33 +68,60 @@ class LambdaProject {
 	}
 
 
+	configure () {
+
+		if (this._hasFetchedConfig) {
+			return Promise.resolve(this.config);
+		}
+
+
+		const configKey = 'config.json';
+		this._hasFetchedConfig = true;
+		debug(`${this.name}: fetching configuration`);
+
+		return this.fetchFromS3('config.json')
+			.then(response => {
+
+				if (response.ContentType !== 'application/json') {
+					console.error(`Warning: Config s3 ${configKey} was not application/json.`);
+					return;
+				}
+
+				try {
+					this.config = new _Config(JSON.parse(response.Body));
+				}
+				catch (issue) {
+					console.error(`Warning: Config s3 ${configKey} could not be parsed.`);
+					return;
+				}
+				return this.config;
+
+			})
+			.catch(issue => {
+
+				if (issue.code == 'NoSuchKey') {
+					console.error(`Warning: No config found at s3 ${configKey}.\n`);
+					return this.config;
+				}
+				return Promise.reject(issue);
+
+			});
+
+	}
+
+
 	build () {
 
 		console.log('BUILD LAMBDAS');
 		const lambdas = this.lambdas;
 		const queue = this._buildQueue;
 		const doLambdaBuild = Promise.all(lambdas.map(l => queue.add(() => l.build())));
+
 		return doLambdaBuild.then(() => {
 			console.log();
 			return this;
 		});
 
-	}
-
-
-	fetchAWSAccountNumber () {
-		if (this.aws.account) {
-			return Promise.resolve(this.aws.account);
-		}
-
-		debug(`${this.name}: fetching aws account number`);
-		return this._stsSDK.getCallerIdentity({}).promise().then(({Account}) => {
-
-			debug(`${this.name}: fetching aws account number finished`);
-			this.aws.account = Account;
-			return this;
-
-		});
 	}
 
 
@@ -112,8 +131,11 @@ class LambdaProject {
 			throw new Error(`Must deploy gateway before linking lambda permissions!`);
 		}
 
-		return this.fetchAWSAccountNumber().then(() => {
+		debug(`${this.name}: fetching aws account number`);
 
+		return this.fetchAccountNumber().then(() => {
+
+			debug(`${this.name}: fetching aws account number finished`);
 			const permissionsWork = this.gateway.usingLambdas.map(info => {
 
 				const { method, path } = info;
@@ -138,19 +160,16 @@ class LambdaProject {
 	}
 
 
-	deploy () {
+	deploy (options) {
 
 		console.log('DEPLOY LAMBDAS');
 		const lambdas = this.lambdas;
 		const queue = this._buildQueue;
-		const doLambdaDeploy = Promise.all(lambdas.map(l => queue.add(() => l.deploy())));
+		const doLambdaDeploy = Promise.all(lambdas.map(l => queue.add(() => l.deploy(options))));
 
 		if (this.gateway.isEmpty) {
 			return Promise.resolve(this);
 		}
-
-		console.log('>>>', this.gateway);
-		process.exit(0);
 
 		return doLambdaDeploy
 			.then(() => {
@@ -184,6 +203,20 @@ class LambdaProject {
 			console.log();			
 			return this;
 		});
+
+	}
+
+}
+
+
+
+class _Config {
+
+	constructor (config = {}) {
+
+		this.environment = Object.assign({}, config.environment);
+		this.defaults = Object.assign({}, config.defaults);
+		this.defaults.lambda = Object.assign({}, this.defaults.lambda);
 
 	}
 
