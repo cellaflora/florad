@@ -14,6 +14,26 @@ const project = new Project({
 });
 
 
+/*
+s3://gatewaytest.flora/config.json
+{
+	"environment": {
+		"DATABASE_HOST": "localhost"
+	},
+	"defaults": {
+		"lambda": {
+			"runtime": "nodejs6.10",
+			"role": "arn:aws:iam::339734559946:role/execute_lambda",
+			"vpcConfig": {
+				"subnetIds": ["subnet-0cb58c27", "subnet-c7d27ffa"],
+				"securityGroupIds": ["sg-04c2487c"]
+			}
+		}
+	}
+}
+*/
+
+
 project.defineLambda({
 	name: 'getusers',
 	path: path.resolve(__dirname, 'getusers'),
@@ -26,6 +46,6 @@ gateway.get('/users/{userId}', gateway.lambda('getusers'));
 
 
 project.build()
-	.then(() => project.deploy())
+	.then(() => project.deploy({force: true}))
 	// .then(() => project.publish('staging'))
 	.catch(console.error);
