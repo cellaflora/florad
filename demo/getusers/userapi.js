@@ -46,6 +46,6 @@ gateway.get('/users/{userId}', gateway.lambda('getusers'));
 
 
 project.build()
-	.then(() => project.deploy({force: true}))
+	.then(() => project.deploy())
 	// .then(() => project.publish('staging'))
 	.catch(console.error);
