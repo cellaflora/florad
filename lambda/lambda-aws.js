@@ -1,16 +1,45 @@
 const AWS =  require('aws-sdk');
 const pick = require('lodash/pick');
+const keys = require('lodash/keys');
+const diff = require('lodash/difference');
+const cap = require('lodash/upperFirst');
 const debug = require('../debug')('lambda');
 const replaceParams = (s, _with) => s.replace(/\{([\s\S]+?)\}/g, _with);
+const lambdaParams = ['runtime', 'role', 'memorySize', 'timeout', 'vpcConfig'];
 
 
 
 class LambdaAWS {
 
+	static awsConfig (config) {
+
+		const awsConfig = {};
+		lambdaParams.forEach(name => {
+			if (config.hasOwnProperty(name)) {
+
+				let param = config[name];
+				if (name === 'vpcConfig') {
+
+					const vpc = {};
+					vpc['SubnetIds'] = param['subnetIds'];
+					vpc['SecurityGroupIds'] = param['securityGroupIds'];
+					param = vpc;
+
+				}
+
+				awsConfig[cap(name)] = param;
+
+			}
+		});
+		return awsConfig;
+
+	}
+
+
 	constructor (project, params) {
 
 		this.project = project;
-		this.configuration = pick(params, ['name', 'runtime', 'role']);
+		this.configuration = pick(params, lambdaParams);
 		this.name = params.name;
 		this.debugName = this.name.toUpperCase();
 		this.versions = [];
@@ -46,9 +75,8 @@ class LambdaAWS {
 			return this.lambdaSDK.listVersionsByFunction(params).promise()
 				.then(({ NextMarker, Versions }) => {
 
-					Versions.forEach(configuration => {
+					Versions.forEach(({FunctionArn, CodeSha256, LastModified}) => {
 
-						const {FunctionArn, CodeSha256, LastModified} = configuration;
 						return versions.push({
 							arn: FunctionArn,
 							hash: CodeSha256,
@@ -97,9 +125,9 @@ class LambdaAWS {
 			Handler: `${this.name}.handler`,
 			Description: `Function ${this.name}`,
 			Publish: true,
-			Role: this.configuration.role,
-			Runtime: this.configuration.runtime,
 		};
+
+		Object.assign(create, LambdaAWS.awsConfig(this.configuration));
 
 		if (!archive) {
 
@@ -186,6 +214,59 @@ class LambdaAWS {
 	}
 
 
+	updateConfiguration ()  {
+
+		const params = {
+			FunctionName: this.name,
+		};
+
+		debug(`${this.debugName}: check deployed configuration`);
+
+		return this.lambdaSDK.getFunctionConfiguration(params).promise()
+			.then(pub => {
+
+				const config = LambdaAWS.awsConfig(this.configuration);
+				const update = {
+					FunctionName: params.FunctionName,
+				};
+
+				let inSync = true;
+				keys(config).forEach(name => {
+
+					if (name === 'VpcConfig') {
+						if (diff(pub[name].SubnetIds, config[name].SubnetIds).length !== 0 ||
+							diff(pub[name].SecurityGroupIds, config[name].SecurityGroupIds).length !== 0)
+						{
+							update[name] = config[name];
+							inSync = false;
+						}
+					}
+					else if (pub[name] !== config[name]) {
+						update[name] = config[name];
+						inSync = false;
+					}
+
+				});
+
+				if (inSync) {
+					debug(`${this.debugName}: deployed configuration is the same`);
+					return Promise.resolve(this);
+				}
+
+				debug(`${this.debugName}: update deployed configuration`);
+
+				return this.lambdaSDK.updateFunctionConfiguration(update).promise()
+					.then(() => {
+						debug(`${this.debugName}: configuration updated`);
+						return this;
+					});
+
+			})
+			.catch(console.error);
+
+	}
+
+
 	addInvokePermission ({method, path, gatewayId, gatewayName}) {
 
 		const {region, account} = this.project.aws;
@@ -199,7 +280,7 @@ class LambdaAWS {
 
 		const params = {
 			Action: 'lambda:InvokeFunction',
-			FunctionName: this.version.arn,
+			FunctionName: this.version.arn || this.name,
 			Principal: 'apigateway.amazonaws.com',
 			StatementId: friendly,
 			SourceArn: methodArn,

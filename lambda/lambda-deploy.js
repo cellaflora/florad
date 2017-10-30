@@ -33,7 +33,7 @@ class LambdaDeploy {
 
 					debug(`${lambda.debugName}: found previous versions`);
 					debug(`${lambda.debugName}: skipping deploy (${lambda.version.arn})`);
-					return Promise.resolve(lambda);
+					return Promise.resolve(this);
 
 				}
 
@@ -46,13 +46,15 @@ class LambdaDeploy {
 					return isFirstDeploy
 						? lambda.createFunction()
 						: lambda.updateFunctionCode()
+							.then(() => lambda.updateConfiguration());
 				});	
 
 			}
 
 			return isFirstDeploy
 				? lambda.createFunction(lambda.archive)
-				: lambda.updateFunctionCode(lambda.archive);
+				: lambda.updateFunctionCode(lambda.archive)
+					.then(() => lambda.updateConfiguration());
 
 		});
 
