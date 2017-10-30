@@ -17,8 +17,6 @@ const project = new Project({
 project.defineLambda({
 	name: 'getusers',
 	path: path.resolve(__dirname, 'getusers'),
-	runtime: 'nodejs6.10',
-	role: 'arn:aws:iam::339734559946:role/execute_lambda',
 });
 const gateway = project.gateway;
 

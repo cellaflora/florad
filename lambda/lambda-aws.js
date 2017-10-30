@@ -44,13 +44,19 @@ class LambdaAWS {
 
 			const params = { FunctionName: name, Marker: marker, MaxItems: 100 };
 			return this.lambdaSDK.listVersionsByFunction(params).promise()
-				.then(({NextMarker, Versions}) => {
+				.then(({ NextMarker, Versions }) => {
 
-					Versions.forEach(({FunctionArn, CodeSha256, LastModified}) => versions.push({
-						arn: FunctionArn,
-						hash: CodeSha256,
-						lastModified: new Date(LastModified),
-					}));
+					Versions.forEach(configuration => {
+
+						const {FunctionArn, CodeSha256, LastModified} = configuration;
+						return versions.push({
+							arn: FunctionArn,
+							hash: CodeSha256,
+							lastModified: new Date(LastModified)
+						});
+
+					});
+
 					if (NextMarker == null) {
 						return versions.sort((a, b) => b.lastModified - a.lastModified);
 					}
@@ -80,9 +86,9 @@ class LambdaAWS {
 
 	createFunction (archive) {
 
-		if (!archive && !this.project.aws.deployBucket) {
+		if (!archive && !this.project.aws.bucket) {
 			throw new Error(`To update lambda, you must either provide `+
-				`an archive or define S3 project deploy-bucket!`);
+				`an archive or define S3 project bucket!`);
 		}
 
 		let create = {
@@ -92,15 +98,15 @@ class LambdaAWS {
 			Description: `Function ${this.name}`,
 			Publish: true,
 			Role: this.configuration.role,
-			Runtime: this.configuration.runtime
+			Runtime: this.configuration.runtime,
 		};
 
 		if (!archive) {
 
 			const code = create.Code;
 			delete code.ZipFile;
-			code.S3Bucket = this.project.aws.deployBucket;
-			code.S3Key = this.name;
+			code.S3Bucket = this.project.aws.bucket;
+			code.S3Key = `${this.name}.zip`;
 
 		}
 
@@ -127,9 +133,9 @@ class LambdaAWS {
 
 	updateFunctionCode (archive) {
 
-		if (!archive && !this.project.aws.deployBucket) {
+		if (!archive && !this.project.aws.bucket) {
 			throw new Error(`To update lambda, you must either provide `+
-				`an archive or define S3 project deploy-bucket!`);
+				`an archive or define S3 project bucket!`);
 		}
 
 		const update = {
@@ -141,8 +147,8 @@ class LambdaAWS {
 		if (!archive) {
 
 			delete update.ZipFile;
-			update.S3Bucket = this.project.aws.deployBucket;
-			update.S3Key = this.name;
+			update.S3Bucket = this.project.aws.bucket;
+			update.S3Key = `${this.name}.zip`;
 
 		}
 
@@ -166,18 +172,13 @@ class LambdaAWS {
 
 	uploadToS3 (archive, params = {}) {
 
-		if (!this.project.aws.deployBucket) {
-			throw new Error(`Must define a project deploy-bucket before uploading to S3!`);
+		if (!this.project.aws.bucket) {
+			throw new Error(`Must define a project bucket before uploading to S3!`);
 		}
 
 		debug(`${this.debugName}: uploading to S3`);
 
-		const upload = Object.assign({}, {
-			Bucket: this.project.aws.deployBucket,
-			Key: this.name,
-			Body: archive
-		}, params);
-		return this.s3SDK.upload(upload).promise().then(() => {
+		return this.project.uploadToS3(archive, `${this.name}.zip`, params).then(() => {
 			debug(`${this.debugName}: upload to S3 finished`);
 			return this;
 		});
