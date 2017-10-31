@@ -7,6 +7,9 @@
     "type": "git",
     "url": "https://gitlab.cellaflora.com/internal/flora.git"
   },
+  "bin": {
+    "flora": "bin/flora.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,6 +22,7 @@
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",
+    "commander": "^2.11.0",
     "debug": "^3.1.0",
     "event-stream": "^3.3.4",
     "execa": "^0.8.0",

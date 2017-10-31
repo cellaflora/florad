@@ -1,2 +1,3 @@
-exports.lambda = require('./lambda');
-exports.gateway = require('./gateway');
+exports.FloraProject = require('./flora-project');
+exports.Lambda = require('./lambda');
+exports.Gateway = require('./gateway');

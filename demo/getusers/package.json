@@ -4,8 +4,14 @@
   "description": "",
   "main": "userapi.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "flora build",
+    "deploy": "flora deploy",
+    "publish": "flora publish"
   },
   "author": "",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "flora": "file:../.."
+  }
 }
