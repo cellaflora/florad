@@ -1,4 +1,8 @@
 TODO
+> better config abstraction
+> part of above is search path resolution
+> use phase registration process to abstract out project
+
 > do some preflight checking of project and lambda initialization params
 > add tail cloudwatch logs for both lambda and gaitway and intelegently combine
-> cli, list projects, list versions, list stages for each
+> cli - tail, list apis, list stages, fetch config, upload config, info, config-test

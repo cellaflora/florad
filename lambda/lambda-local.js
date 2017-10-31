@@ -1,12 +1,10 @@
 const path = require('path');
 const fs = require('fs');
-const Project = require('../project');
 const LambdaCompiler = require('./lambda-compiler');
 const LambdaLink = require('./lambda-link');
 const LambdaPackage = require('./lambda-package');
 const LambdaAWS = require('./lambda-aws');
 const LambdaDeploy = require('./lambda-deploy');
-
 
 
 
@@ -16,7 +14,7 @@ class LambdaLocal extends LambdaAWS {
 
 		super(project, params);
 
-		this.path = require.resolve(params.path);
+		this.path = require.resolve(project.definitionPath(params.path));
 		this.buildDirectory = path.resolve(this.project.buildDirectory, this.name);
 		this.modulesDirectory = path.resolve(this.buildDirectory, 'node_modules');
 		this.packagePath = path.resolve(this.buildDirectory, 'package.json');

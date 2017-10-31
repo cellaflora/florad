@@ -3,7 +3,7 @@ if (!process.env.DEBUG) {
 }
 
 const path = require('path');
-const Project = require('../../project');
+const Project = require('flora/project');
 
 
 const project = new Project({ 

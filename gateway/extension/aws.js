@@ -69,20 +69,23 @@ class GatewayAWS {
 
 		const doFetch = this.fetchRestApi();
 
-		const params = {
-			body: new Buffer(JSON.stringify(schema)),
-			restApiId: this.id,
-			failOnWarnings: true,
-			mode: 'overwrite'
-		};
-		return doFetch.then(() =>
-			this.gatewaySDK.putRestApi(params)
+		
+		return doFetch.then(() => {
+
+			const params = {
+				body: new Buffer(JSON.stringify(schema)),
+				restApiId: this.id,
+				failOnWarnings: true,
+				mode: 'overwrite'
+			};
+
+			return this.gatewaySDK.putRestApi(params)
 				.promise()
 				.then(definition => {
 					this.id = definition.id;
 					return this;
-				})
-		);
+				});
+		});
 
 	}
 
@@ -91,18 +94,22 @@ class GatewayAWS {
 
 		const doFetch = this.fetchRestApi();
 
-		const params = {
-			restApiId: this.id,
-			stageName: stage,
-			stageDescription: `Stage ${stage}`,
-		};
-		return doFetch.then(() =>
-			this.gatewaySDK.createDeployment(params)
+		
+		return doFetch.then(() => {
+
+			const params = {
+				restApiId: this.id,
+				stageName: stage,
+				stageDescription: `Stage ${stage}`,
+			};
+
+			return this.gatewaySDK.createDeployment(params)
 				.promise()
 				.then(stuff => {
 					return this;
-				})
-		);
+				});
+
+		});
 
 	}
 
