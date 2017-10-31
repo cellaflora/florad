@@ -1,7 +1,7 @@
 const fs = require('fs');
 const execa = require('execa');
-const debug = require('../debug')('link');
-const NPMModules = require('../npm-modules');
+const debug = require('../utils/debug')('link');
+const NPMModules = require('../utils/npm-modules');
 const nodePreGYP = require('node-pre-gyp');
 const path = require('path');
 

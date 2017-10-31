@@ -1,5 +1,5 @@
 const fs = require('fs');
-const debug = require('../debug')('deploy');
+const debug = require('../utils/debug')('deploy');
 
 
 class LambdaDeploy {

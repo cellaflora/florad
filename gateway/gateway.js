@@ -1,7 +1,7 @@
 const middleware = require('./middleware');
 const extensions = require('./extension');
 const swagger = require('./swagger');
-const debug = require('../debug')('gateway');
+const debug = require('../utils/debug')('gateway');
 
 
 

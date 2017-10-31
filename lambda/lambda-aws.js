@@ -3,7 +3,7 @@ const pick = require('lodash/pick');
 const keys = require('lodash/keys');
 const diff = require('lodash/difference');
 const cap = require('lodash/upperFirst');
-const debug = require('../debug')('lambda');
+const debug = require('../utils/debug')('lambda');
 const replaceParams = (s, _with) => s.replace(/\{([\s\S]+?)\}/g, _with);
 const lambdaParams = ['runtime', 'role', 'memorySize', 'timeout', 'vpcConfig'];
 

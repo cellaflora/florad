@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const keys = require('lodash/keys');
 const clone = require('lodash/clone');
-const debug = require('../debug')('compiler');
+const debug = require('../utils/debug')('compiler');
 
 
 

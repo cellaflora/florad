@@ -1,7 +1,7 @@
 const constant = new Date('2017-10-17T18:23:35.534Z');
 const crypto = require('crypto');
 const fs = require('fs');
-const debug = require('../debug')('package');
+const debug = require('../utils/debug')('package');
 const archiver = require('archiver');
 const path = require('path');
 const es = require('event-stream');

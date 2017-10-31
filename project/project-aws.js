@@ -1,5 +1,5 @@
 const AWS = require('aws-sdk');
-const debug = require('./debug')('project');
+const debug = require('../utils/debug')('project');
 
 
 
