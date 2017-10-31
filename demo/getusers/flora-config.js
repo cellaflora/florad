@@ -1,7 +1,7 @@
 
-module.exports = function flora ({FloraProject}) {
+module.exports = function flora ({Project}) {
 
-	const project = new FloraProject({ 
+	const project = new Project({ 
 		name: 'gatewaytest',
 		projectDirectory: '.',
 		buildDirectory: 'build',

@@ -1,9 +1,9 @@
 const ProjectAWS = require('./project-aws');
 const path = require('path');
-const debug = require('./debug')('project');
-const NPMModules = require('./npm-modules');
-const Lambda = require('./lambda');
-const Gateway = require('./gateway');
+const debug = require('../utils/debug')('project');
+const NPMModules = require('../utils/npm-modules');
+const Lambda = require('../lambda');
+const Gateway = require('../gateway');
 const Queue = require('promise-queue');
 const uuid = require('uuid').v1;
 const fs = require('fs');
@@ -12,7 +12,7 @@ const fs = require('fs');
 
 const projects = [];
 
-class FloraProject extends ProjectAWS {
+class Project extends ProjectAWS {
 
 	static register (project) {
 		projects.push(project);
@@ -36,7 +36,7 @@ class FloraProject extends ProjectAWS {
 	}
 
 	definitionPath (prospect) {
-		return FloraProject.definitionPath(prospect);
+		return Project.definitionPath(prospect);
 	}
 
 
@@ -49,7 +49,7 @@ class FloraProject extends ProjectAWS {
 		concurency = 4})
 	{
 
-		const packagePath = path.resolve(FloraProject.definitionPath(projectDirectory), 'package.json');
+		const packagePath = path.resolve(Project.definitionPath(projectDirectory), 'package.json');
 		const packageJson = require(packagePath);
 
 		super(name || packageJson.name, aws);
@@ -82,7 +82,7 @@ class FloraProject extends ProjectAWS {
 		this._hasFetchedConfig = false;
 		this.config = new _Config();
 
-		FloraProject.register(this);
+		Project.register(this);
 
 	}
 
@@ -259,4 +259,4 @@ class _Config {
 
 
 
-module.exports = FloraProject;
+module.exports = Project;

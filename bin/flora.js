@@ -55,7 +55,7 @@ program
 		configure(command.parent.config)
 			.then(() => {
 
-				return flora.FloraProject.list().reduce((next, prj) => {
+				return flora.Project.list().reduce((next, prj) => {
 					return next.then(() => prj.build());
 				}, Promise.resolve());
 
@@ -82,7 +82,7 @@ program
 		configure(command.parent.config)
 			.then(() => {
 
-				return flora.FloraProject.list().reduce((next, prj) => {
+				return flora.Project.list().reduce((next, prj) => {
 					return next.then(() => prj.deploy({force, useS3}));
 				}, Promise.resolve());
 
@@ -103,7 +103,7 @@ program
 		configure(command.parent.config)
 			.then(() => {
 
-				return flora.FloraProject.list().reduce((next, prj) => {
+				return flora.Project.list().reduce((next, prj) => {
 					return next.then(() => prj.publish(stage));
 				}, Promise.resolve());
 
