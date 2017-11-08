@@ -1,14 +1,14 @@
 
 module.exports = function flora ({Project}) {
 
-	const project = new Project({ 
-		name: 'gatewaytest',
-		projectDirectory: '.',
-		buildDirectory: 'build',
-		aws: { profile: 'cellaflora' },
+	const project = new Project({
+		aws: { 
+			profile: 'cellaflora',
+			bucket: 'gatewaytest.flora' // default: <project-name>.flora
+		},
 	});
 
-	project.defineLambda({name: 'getusers', path: 'getusers'});
+	project.defineLambda({entry: './getusers'});
 
 	const gateway = project.gateway;
 	gateway.get('/users', gateway.lambda('getusers'));

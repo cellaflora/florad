@@ -5,15 +5,16 @@ const debug = require('../../utils/debug')('gateway');
 
 class GatewayAWS {
 
-	constructor (project) {
+	constructor ({name, aws}) {
 
-		this.project = project;
 		this.id = null;
-		this.name = this.project.gatewayName;
+		this.name = name;
+		this.aws = aws;
+		
 		this.gatewaySDK = new AWS.APIGateway({
 			apiVersion: '2015-07-09',
-			credentials: new AWS.SharedIniFileCredentials({profile: project.aws.profile}),
-			region: project.aws.region,
+			credentials: aws.credentials,
+			region: aws.region,
 		});
 
 	}
@@ -116,7 +117,7 @@ class GatewayAWS {
 
 	stageURL (stage) {
 		return this.fetchRestApi().then(() => {
-			const region = this.project.aws.region;
+			const region = this.aws.region;
 			return `https://${this.id}.execute-api.${region}.amazonaws.com/${stage}`;
 		});
 	}
@@ -125,9 +126,9 @@ class GatewayAWS {
 
 
 
-module.exports = (gateway, project) => {
+module.exports = (gateway) => {
 
-	const gatewayAWS = new GatewayAWS(project);
+	const gatewayAWS = new GatewayAWS({ name: gateway.name, aws: gateway.aws });
 
 	gateway.awsId = null;
 
@@ -139,7 +140,6 @@ module.exports = (gateway, project) => {
 		
 		const deployApi = fetchApi.then(() => {
 
-			debug(`${gatewayAWS.name}: fetching definition finished`);
 			if (!gatewayAWS.id) {
 				debug(`${gatewayAWS.name}: deploying new api`);
 				return gatewayAWS.newRestApi(gateway.schema.document);

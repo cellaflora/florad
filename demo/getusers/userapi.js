@@ -8,36 +8,15 @@ const Project = require('flora/project');
 
 const project = new Project({ 
 	name: 'gatewaytest',
-	projectDirectory: __dirname,
-	buildDirectory: path.resolve(__dirname, 'build'),
+	paths: {
+		project: __dirname,
+		build: 'build',
+	},
 	aws: { profile: 'cellaflora' },
 });
 
 
-/*
-s3://gatewaytest.flora/config.json
-{
-	"environment": {
-		"DATABASE_HOST": "localhost"
-	},
-	"defaults": {
-		"lambda": {
-			"runtime": "nodejs6.10",
-			"role": "arn:aws:iam::339734559946:role/execute_lambda",
-			"vpcConfig": {
-				"subnetIds": ["subnet-0cb58c27", "subnet-c7d27ffa"],
-				"securityGroupIds": ["sg-04c2487c"]
-			}
-		}
-	}
-}
-*/
-
-
-project.defineLambda({
-	name: 'getusers',
-	path: path.resolve(__dirname, 'getusers'),
-});
+project.defineLambda({ entry: './getusers' });
 const gateway = project.gateway;
 
 
@@ -46,6 +25,6 @@ gateway.get('/users/{userId}', gateway.lambda('getusers'));
 
 
 project.build()
-	.then(() => project.deploy())
-	// .then(() => project.publish('staging'))
+	.then(() => project.deploy({useS3: true, force: false}))
+	.then(() => project.publish('staging'))
 	.catch(console.error);

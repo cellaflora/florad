@@ -1,6 +1,6 @@
 const fs = require('fs');
 const execa = require('execa');
-const debug = require('../utils/debug')('link');
+const debug = require('../../utils/debug')('link');
 const NPMModules = require('../utils/npm-modules');
 const nodePreGYP = require('node-pre-gyp');
 const path = require('path');
@@ -9,17 +9,19 @@ const path = require('path');
 
 class LambdaLink {
 
-	constructor (lambda) {
-		this.lambda = lambda;
+	static _projectDependencyTree (lambda) {
+
+		debug(`${lambda.debugName}: fetching project dependencies tree`);
+		return NPMModules.dependencyTree(lambda.project.paths.modules, true).then(tree => {
+			return tree;
+		});
+
 	}
 
 
-	_npmPackage () {
+	static _npmPackage (lambda) {
 
-		const lambda = this.lambda;
-		const project = lambda.project;
-
-		return project.dependencyTree().then(dtree => {
+		return LambdaLink._projectDependencyTree(lambda).then(dtree => {
 
 			const dependencies = {};
 			lambda.externals.forEach(module => {
@@ -32,14 +34,14 @@ class LambdaLink {
 
 			const npmPackage = {
 				name: lambda.name,
-				version: project.version,
+				version: lambda.project.version,
 				description: `Lambda function ${lambda.name}`,
 				main: `${lambda.name}.js`,
 				bin: {},
 				scripts: {},
-				repository: project.repository,
-				author: project.author,
-				license: project.license,
+				repository: lambda.project.repository,
+				author: lambda.project.author,
+				license: lambda.project.license,
 				dependencies,
 			};
 			return npmPackage;
@@ -49,26 +51,23 @@ class LambdaLink {
 	}
 
 
-	install () {
+	static install (lambda) {
 
-		const lambda = this.lambda;
+		return LambdaLink._npmPackage(lambda).then(npmPackage => {
 
-		return this._npmPackage().then(npmPackage => {
-
-			if (typeof this.lambda.prenpm === 'function') {
-				npmPackage = this.lambda.prenpm(npmPackage);
+			if (typeof lambda.prenpm === 'function') {
+				npmPackage = lambda.prenpm(npmPackage);
 			}
 
 			// npm install
-			fs.writeFileSync(lambda.packagePath, JSON.stringify(npmPackage, null, 4));
-			try { fs.mkdirSync(lambda.modulesDirectory) } catch (issue) {}
+			fs.writeFileSync(lambda.paths.package, JSON.stringify(npmPackage, null, 4));
+			try { fs.mkdirSync(lambda.paths.modules) } catch (issue) {}
 
-			const cwd = lambda.buildDirectory;
+			const cwd = lambda.paths.lambda;
 			const npminstall = execa('npm', [ 'i', '--json', '--silent' ], {cwd});
 
 			debug(`${lambda.debugName}: $npm install`);
 			return npminstall.then(() => {
-				debug(`${lambda.debugName}: $npm install finished`);
 				return lambda;
 			})
 			.catch(() => Promise.reject(new Error(`FAILED: ${cwd}/npm i --json --silent`)));
@@ -77,7 +76,7 @@ class LambdaLink {
 		.then(() => {
 
 			debug(`${lambda.debugName}: fetching dependencies tree`);
-			return NPMModules.dependencyTree(lambda.modulesDirectory, true);
+			return NPMModules.dependencyTree(lambda.paths.modules, true);
 
 		})
 		.then(tree => NPMModules.findGypModules(tree))
@@ -129,12 +128,7 @@ class LambdaLink {
 					'../../bin/node-pre-gyp');
 				const nodePreGyp = execa(exe, args, {cwd});
 
-				return nodePreGyp.then(result => {
-
-					debug(`${lambda.debugName}: $node-pre-gyp ${module.name} finished`);
-					return lambda;
-
-				})
+				return nodePreGyp.then(result => lambda)
 				.catch(error => {
 					
 					console.error(`Warning: $node-pre-gyp ${args.join(' ')} ` +

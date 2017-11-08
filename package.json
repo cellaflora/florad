@@ -28,6 +28,7 @@
     "execa": "^0.8.0",
     "find": "^0.2.7",
     "glob": "^7.1.2",
+    "lambda-deploy": "git+ssh://git@gitlab.cellaflora.com:clients/lambda-deploy.git#v0.1.0",
     "lodash": "^4.17.4",
     "node-pre-gyp": "^0.6.38",
     "promise-queue": "^2.2.3",

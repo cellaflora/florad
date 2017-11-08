@@ -37,3 +37,4 @@ node_modules
 
 # Builds
 demo/*/build
+demo/*/flora.build
