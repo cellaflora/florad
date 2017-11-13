@@ -8,18 +8,20 @@ const Project = require('../../project');
 
 const aws = {
 	profile: 'cellaflora',
-	deployBucket: 'cellaflora-flora'
+	bucket: 'cellaflora-flora'
 };
 
-const project = new Project({ 
-	projectDirectory: __dirname,
-	buildDirectory: path.resolve(__dirname, 'build'),
+const project = new Project({
+	paths: {
+		project: __dirname,
+		build: 'build',
+	},
 	aws,
 });
 
 project.defineLambda({
 	name: 'compiled-lambda',
-	path: path.resolve(__dirname, 'lambda'),
+	entry: path.resolve(__dirname, 'lambda'),
 	runtime: 'nodejs6.10',
 	role: 'arn:aws:iam::339734559946:role/execute_lambda',
 	prewebpack: config => config,  // optional
@@ -28,5 +30,5 @@ project.defineLambda({
 });
 
 project.build()
-	.then(() => project.deploy({useS3: true}))
+	.then(() => project.deploy({useS3: true, force: true}))
 	.catch(console.error);

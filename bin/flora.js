@@ -35,7 +35,7 @@ const configure = config => {
 	}
 
 	const configFunc = require(floraConfig);
-	process.env['FLORA_CONFIG_PATH'] = floraConfig;
+	process.env['FLORA_CWD'] = path.dirname(floraConfig);
 
 	if (configFunc.length === 1) {
 		return Promise.resolve(configFunc(flora));
@@ -55,7 +55,7 @@ program
 		configure(command.parent.config)
 			.then(() => {
 
-				return flora.Project.list().reduce((next, prj) => {
+				return flora.Project.projects().reduce((next, prj) => {
 					return next.then(() => prj.build());
 				}, Promise.resolve());
 
@@ -82,7 +82,7 @@ program
 		configure(command.parent.config)
 			.then(() => {
 
-				return flora.Project.list().reduce((next, prj) => {
+				return flora.Project.projects().reduce((next, prj) => {
 					return next.then(() => prj.deploy({force, useS3}));
 				}, Promise.resolve());
 
@@ -103,7 +103,7 @@ program
 		configure(command.parent.config)
 			.then(() => {
 
-				return flora.Project.list().reduce((next, prj) => {
+				return flora.Project.projects().reduce((next, prj) => {
 					return next.then(() => prj.publish(stage));
 				}, Promise.resolve());
 

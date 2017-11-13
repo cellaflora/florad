@@ -1,1 +1,1 @@
-module.exports = require('./lambda-local');
+module.exports = require('./project-lambda');

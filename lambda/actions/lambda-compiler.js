@@ -1,20 +1,19 @@
 const webpack = require('webpack');
 const keys = require('lodash/keys');
 const clone = require('lodash/clone');
-const debug = require('../utils/debug')('compiler');
+const debug = require('../../utils/debug')('compiler');
 
 
 
 class LambdaCompiler {
 
-	constructor (lambda) {
+	static webpackConfig (lambda) {
 
-		this.lambda = lambda;
-		this.webpackConfig = {
-			entry: lambda.path,
+		return {
+			entry: lambda.paths.entry,
 			target: 'node',
 			output: {
-				path: lambda.buildDirectory,
+				path: lambda.paths.lambda,
 				library: lambda.name,
 				libraryTarget: 'commonjs2',
 				filename: `${lambda.name}.js`,
@@ -34,23 +33,26 @@ class LambdaCompiler {
 	}
 
 
-	run () {
+	static compile (lambda) {
 
 		const isModule = req => /^(\/|\.\/|\.\.\/|.*!)/.exec(req) === null;
 		const externals = {};
 
-		let config = clone(this.webpackConfig);
-		if (typeof this.lambda.prewebpack === 'function') {
-			config = this.lambda.prewebpack(config);
+		let config = LambdaCompiler.webpackConfig(lambda);
+
+		if (typeof lambda.prewebpack === 'function') {
+			config = lambda.prewebpack(config);
 		}
-		config.externals = clone(this.webpackConfig.externals);
-		config.plugins = clone(this.webpackConfig.plugins);
+
+		config.externals = clone(config.externals);
+		config.plugins = clone(config.plugins);
+
 
 		config.externals.push((context, request, callback) => {
 
 				if (isModule(request)) {
 
-					debug(`${this.lambda.debugName}: found external '${request}' durring build`);
+					debug(`${lambda.debugName}: found external '${request}' durring build`);
 					externals[request] = null;
 					return callback(null, request);
 
@@ -59,28 +61,26 @@ class LambdaCompiler {
 
 		});
 
-		const env = this.lambda.environment;
+
+		const env = lambda.environment;
 		keys(env).forEach(name => {
 
 			env[name] = JSON.stringify(env[name]);
-			debug(`${this.lambda.debugName}: define ${name}=${env[name]}`);
+			debug(`${lambda.debugName}: define ${name}=${env[name]}`);
 
 		});
-		config.plugins.push(new webpack.DefinePlugin(env))
+		config.plugins.push(new webpack.DefinePlugin(env));
 
-		const compiler = new webpack(config);
+
 		return new Promise((resolve, reject) => {
 
-			debug(`${this.lambda.debugName}: building lambda (${this.lambda.path})`);
-			compiler.run((error, stats) => {
+			new webpack(config).run((error, stats) => {
 
-				debug(`${this.lambda.debugName}: finished lambda`);
 				if (error) {
 					reject(error);
 					return;
 				}
-				this.lambda.externals = keys(externals);
-				resolve(this.lambda);
+				resolve({ externals: keys(externals) });
 
 			});
 

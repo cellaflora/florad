@@ -7,20 +7,20 @@ const debug = require('../utils/debug')('gateway');
 
 class Gateway {
 
-	constructor (project, patch = []) {
+	constructor ({ name, version, aws = {} }, patch = []) {
 
-		this.project = project;
-		const title = project.gatewayName;
-		const version = project.gatewayVersion;
+		this.name = name;
+		this.version = version;
+		this.aws = aws;
 
 		this.middleware = middleware.slice();
 
 		this.schema = new swagger.OpenAPI({
-			info: new swagger.Info({ title, version }),
+			info: new swagger.Info({ title: name, version }),
 			paths: new swagger.Paths(),
 		});
 
-		extensions.concat(patch).forEach(ext => ext(this, project));
+		extensions.concat(patch).forEach(ext => ext(this));
 
 		this.programs = [];
 
@@ -99,7 +99,7 @@ class Gateway {
 					return;
 				}
 
-				debug(`${this.project.gatewayName}: ${method.toUpperCase()} ${path}`);
+				debug(`${this.name}: ${method.toUpperCase()} ${path}`);
 				resolve();
 
 			}))();
