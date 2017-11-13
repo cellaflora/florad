@@ -99,7 +99,7 @@ class AWSProject extends InfoProject {
 					if (issue.code == 'NoSuchKey' || issue.code == 'NoSuchBucket') {
 
 						const s3Path = `s3://${this.aws.bucket}/${configKey}`;
-						console.error(`Warning: No config found on S3 ${s3Path}.`);
+						console.error(`Warning: No config found on S3 (${s3Path}).`);
 						return this;
 
 					}

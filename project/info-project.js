@@ -1,6 +1,7 @@
 const pick = require('lodash/pick');
 const path = require('path');
 const AWS = require('aws-sdk');
+const fs = require('fs');
 const select = (val, def) => typeof val !== 'undefined' && val !== null? val: def;
 
 
@@ -29,6 +30,10 @@ class InfoProject {
 		this.paths.bin = this.resolvePath('./node_modules/.bin');
 		this.paths.packageJSON = this.resolvePath('./package.json');
 		this.paths.schema = path.resolve(this.paths.build, 'api.json');
+
+		if (!fs.existsSync(this.paths.build)) {
+			fs.mkdirSync(this.paths.build);
+		}
 
 
 		// setup info
