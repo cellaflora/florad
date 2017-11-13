@@ -1,12 +1,7 @@
 
 module.exports = function flora ({Project}) {
 
-	const project = new Project({
-		aws: { 
-			profile: 'cellaflora',
-			bucket: 'gatewaytest.flora' // default: <project-name>.flora
-		},
-	});
+	const project = new Project({ aws: { profile: 'cellaflora' } });
 
 	project.defineLambda({entry: './getusers'});
 
