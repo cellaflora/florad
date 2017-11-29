@@ -10,9 +10,9 @@ module.exports = function (project) {
 		project.lambdas.push(new Lambda(project, def))
 	};
 
-	project.task('lambda:build', configure => {
 
-		project.lambdas.forEach(lambda => {
+	const setConfigurationOnLambdas = function(lambdas, configure) {
+		lambdas.forEach(lambda => {
 
 			if (configure && configure.hasOwnProperty('environment')) {
 				Object.assign(lambda.environment, configure.environment);
@@ -26,6 +26,11 @@ module.exports = function (project) {
 			}
 
 		});
+	}
+
+	project.task('lambda:build', configure => {
+
+		setConfigurationOnLambdas(project.lambdas, configure);
 
 		return project.lambdas.map(lambda => () => lambda.build());
 
@@ -33,6 +38,8 @@ module.exports = function (project) {
 
 
 	project.task('lambda:deploy', configure => {
+
+		setConfigurationOnLambdas(project.lambdas, configure);
 
 		return project.lambdas.map(lambda => (...args) => lambda.deploy(...args));
 
