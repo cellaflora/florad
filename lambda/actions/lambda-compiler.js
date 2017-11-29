@@ -35,7 +35,10 @@ class LambdaCompiler {
 
 	static compile (lambda) {
 
-		const isModule = req => /^(\/|\.\/|\.\.\/|.*!)/.exec(req) === null;
+		const isModule = req =>
+			/^(\/|\.\/|\.\.\/|.*!)/.exec(req) === null &&
+			require.resolve(req) != req;
+
 		const externals = {};
 
 		let config = LambdaCompiler.webpackConfig(lambda);
