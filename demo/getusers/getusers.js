@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 
 exports.handler = (event, context, callback) => {
 
