@@ -27,6 +27,11 @@ class LambdaLink {
 			lambda.externals.forEach(module => {
 
 				const version = (dtree[module]||{version:null}).version;
+
+				if (!version) {
+					throw new Error(`Dependency ${module} is not installed.`);
+				}
+
 				dependencies[module] = version;
 				debug(`${lambda.debugName}: use ${module}@${version}`);
 
@@ -61,14 +66,16 @@ class LambdaLink {
 
 			// npm install
 			fs.writeFileSync(lambda.paths.package, JSON.stringify(npmPackage, null, 4));
-			try { fs.mkdirSync(lambda.paths.modules) } catch (issue) {}
 
 			const cwd = lambda.paths.lambda;
 			const npminstall = execa('npm', [ 'i', '--json', '--silent' ], {cwd});
 
 			debug(`${lambda.debugName}: $npm install`);
 			return npminstall.then(() => {
+
+				try { fs.mkdirSync(lambda.paths.modules) } catch (issue) {}
 				return lambda;
+
 			})
 			.catch(() => Promise.reject(new Error(`FAILED: ${cwd}/npm i --json --silent`)));
 
