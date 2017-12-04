@@ -10,7 +10,7 @@ class LambdaCompiler {
 	static webpackConfig (lambda) {
 
 		return {
-			entry: lambda.paths.entry,
+			entry: ['babel-polyfill', lambda.paths.entry],
 			target: 'node',
 			output: {
 				path: lambda.paths.lambda,
