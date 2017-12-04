@@ -4,6 +4,7 @@ const debug = require('../../utils/debug')('link');
 const NPMModules = require('../utils/npm-modules');
 const nodePreGYP = require('node-pre-gyp');
 const path = require('path');
+const polyfillVersion = require('../../package.json').dependencies['babel-polyfill'];
 
 
 
@@ -23,12 +24,15 @@ class LambdaLink {
 
 		return LambdaLink._projectDependencyTree(lambda).then(dtree => {
 
-			const dependencies = {};
+			const dependencies = {
+				'babel-polyfill': polyfillVersion,
+			};
+
 			lambda.externals.forEach(module => {
 
 				const version = (dtree[module]||{version:null}).version;
 
-				if (!version) {
+				if (!version && module !== 'babel-polyfill') {
 					throw new Error(`Dependency ${module} is not installed.`);
 				}
 

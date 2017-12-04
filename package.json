@@ -1,6 +1,6 @@
 {
   "name": "flora",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -21,6 +21,7 @@
     "aws-sdk": "^2.138.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "commander": "^2.11.0",
     "debug": "^3.1.0",

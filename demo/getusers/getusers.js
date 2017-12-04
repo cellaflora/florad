@@ -2,8 +2,10 @@ const fs = require('fs');
 const pick = require('lodash/pick');
 
 
+const sleep = async mil => new Promise(res, setTimeout(res, mil));
 
-exports.handler = (event, context, callback) => {
+
+exports.handler = async (event, context, callback) => {
 
 	let filter = () => true;
 	const { params } = event;
@@ -19,6 +21,7 @@ exports.handler = (event, context, callback) => {
 		}
 	});
 
+	await sleep(1000);
 
 	callback(null, {
 		statusCode: 200,
