@@ -56,7 +56,7 @@ class LambdaCompiler {
 				if (isModule(request)) {
 
 					debug(`${lambda.debugName}: found external '${request}' durring build`);
-					externals[request] = null;
+					externals[request.split('/')[0]] = null;
 					return callback(null, request);
 
 				}

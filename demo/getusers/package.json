@@ -13,6 +13,7 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
-    "flora": "file:../.."
+    "flora": "file:../..",
+    "lodash": "^4.17.4"
   }
 }

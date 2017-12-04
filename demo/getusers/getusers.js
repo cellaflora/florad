@@ -1,4 +1,6 @@
 const fs = require('fs');
+const pick = require('lodash/pick');
+
 
 
 exports.handler = (event, context, callback) => {
@@ -6,6 +8,8 @@ exports.handler = (event, context, callback) => {
 	let filter = () => true;
 	const { params } = event;
 	const pathParams = params.path;
+	const o = pick({'me': 'jacob'}, ['me']);
+	console.log(o);
 
 
 	Object.keys(params.path).forEach(name => {
