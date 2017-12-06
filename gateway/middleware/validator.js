@@ -8,7 +8,7 @@ module.exports = function (req, res) {
 			throw new MiddlewareError('validator', name, req);
 		}
 
-		req.operation.apiGatewayIntegration.apiGatewayRequestValidator = name;
+		req.operation.apiGatewayRequestValidator = name;
 
 	};
 

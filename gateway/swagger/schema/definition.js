@@ -114,6 +114,7 @@ exports.Operation = {
 		operationId: String,
 		parameters: ['#Parameter'],
 		security: ['#SecurityRequirement'],
+		'x-amazon-apigateway-request-validator': String,
 	},
 };
 
@@ -138,7 +139,6 @@ exports.APIGatewayIntegration = {
 		passthroughBehavior: String,
 	},
 	optional: {
-		'x-amazon-apigateway-request-validator': String,
 		httpMethod: String,
 		uri: String,
 		contentHandling: String,
