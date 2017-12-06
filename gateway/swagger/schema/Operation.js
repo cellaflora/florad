@@ -6,14 +6,19 @@ module.exports = function builder (Parent, swagger) {
 	class Operation extends Parent {
 
 		constructor (params) {
-			
+
 			super(params);
 
 			Object.defineProperty(this, 'apiGatewayIntegration', {
 				get: () => this['x-amazon-apigateway-integration'],
 				set: integration => this['x-amazon-apigateway-integration'] = integration,
 			});
-			
+
+			Object.defineProperty(this, 'apiGatewayRequestValidator', {
+				get: () => this['x-amazon-apigateway-request-validator'],
+				set: integration => this['x-amazon-apigateway-request-validator'] = integration,
+			});
+
 		}
 
 

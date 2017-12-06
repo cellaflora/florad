@@ -7,11 +7,6 @@ module.exports = function builder (Parent, swagger) {
 
 			super(params);
 
-			Object.defineProperty(this, 'apiGatewayRequestValidator', {
-				get: () => this['x-amazon-apigateway-request-validator'],
-				set: integration => this['x-amazon-apigateway-request-validator'] = integration,
-			});
-
 		}
 
 		static requestQueryParam (name) {
