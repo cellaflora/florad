@@ -2,7 +2,7 @@ const fs = require('fs');
 const pick = require('lodash/pick');
 
 
-const sleep = async mil => new Promise(res, setTimeout(res, mil));
+const sleep = async mil => new Promise(res => setTimeout(res, mil));
 
 
 exports.handler = async (event, context, callback) => {

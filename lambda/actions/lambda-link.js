@@ -30,9 +30,13 @@ class LambdaLink {
 
 			lambda.externals.forEach(module => {
 
+				if (dependencies.hasOwnProperty(module)) {
+					return;
+				}
+
 				const version = (dtree[module]||{version:null}).version;
 
-				if (!version && module !== 'babel-polyfill') {
+				if (!version) {
 					throw new Error(`Dependency ${module} is not installed.`);
 				}
 
