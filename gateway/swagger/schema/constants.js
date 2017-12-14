@@ -23,4 +23,9 @@ module.exports = {
 	OPTIONS: 'OPTIONS',
 	PATCH: 'PATCH',
 	POST: 'POST',
+
+	// Auth Types
+	REQUEST: 'request',
+	TOKEN: 'token',
+	COGNITO: 'cognito_user_pools'
 };

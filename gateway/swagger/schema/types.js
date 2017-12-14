@@ -5,3 +5,4 @@ exports.SecurityRequirement = require('./SecurityRequirement');
 exports.Schema = require('./Schema');
 exports.APIGatewayIntegrationResponse = require('./APIGatewayIntegrationResponse');
 exports.Response = require('./Response');
+exports.SecurityDefinition = require('./SecurityDefinition');

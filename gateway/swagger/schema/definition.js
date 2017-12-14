@@ -86,17 +86,29 @@ exports.PathItem = {
 
 exports.APIGatewayAuthorizer = {
 	required: {
-		name: String,
-		type: String,
-		authorizerUri: String,
-		identitySource: String,
+		// token: identity built into token,
+		// request: identity built into request params,
+		// and other (e.g. cognito_user_pools)
+		type: String, 
+		
+		
 	},
 	optional: {
-		providerARNs: [String],
-		authType: String,
+		// for lambda authorizer
+		// and execution role for lambda authorizer
+		authorizerUri: String, 
 		authorizerCredentials: String,
+
+		// mapping expressions used against 'request' type authorization
+		// and regex used for validating 'token' type authorization
+		identitySource: String,
 		identityValidationExpression: String,
+
+		// cache time for authorization
 		authorizerResultTtlInSeconds: String,
+
+		// cognito pools if 'cognito_user_pools' type
+		providerARNs: [String],
 	}
 };
 

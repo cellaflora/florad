@@ -1,4 +1,4 @@
-const { SecurityDefinition } = require('../swagger');
+const { SecurityDefinition, APIGatewayAuthorizer, constants } = require('../swagger');
 
 
 module.exports = function (gateway) {
@@ -17,6 +17,21 @@ module.exports = function (gateway) {
 			schema.securityDefinitions = Object.assign(securitytab, { [name]: security });
 
 		}
+
+	};
+
+	gateway.defineCognito = (name, providerARNs = []) => {
+
+		const type = constants.COGNITO;
+		const authorizer = new APIGatewayAuthorizer({providerARNs, type});
+
+		return gateway.defineSecurity(name, {
+			type: 'apiKey',
+			name: 'Authorization',
+			in: 'header',
+			apiGatewayAuthType: type,
+			apiGatewayAuthorizer: authorizer,
+		});
 
 	};
 
