@@ -16,6 +16,11 @@ module.exports = function flora ({Project}) {
 		req.usesValidator('getusers-validator');
 	});
 
+
+	gateway.post('/users', gateway.lambda('getusers'), (req, res) => {
+		req.usesValidator('getusers-validator');
+	});
+
 	gateway.get('/users/{userId}', gateway.lambda('getusers'));
 
 };

@@ -63,8 +63,17 @@ class Gateway {
 			'x-amazon-apigateway-integration': integration
 		});
 
-		const pathItem = new swagger.PathItem({ [method]: operation });
-		this.schema.paths.set(path, pathItem);
+		const pathItem = this.schema.paths.get(path);
+
+		if (!pathItem) {
+
+			const pathItem = new swagger.PathItem({ [method]: operation });
+			this.schema.paths.set(path, pathItem);
+
+		}
+		else {
+			pathItem[method] = operation;
+		}
 
 
 		const request = { method, path, operation };
