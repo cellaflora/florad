@@ -27,7 +27,7 @@ module.exports = function (project) {
 				throw new MiddlewareError('lambda.arn', name, req);
 			}
 
-			usingLambdas[req.path] = {
+			usingLambdas[`${req.method}:${req.path}`] = {
 				path: req.path,
 				method: req.method,
 				lambda
