@@ -33,7 +33,12 @@ module.exports = function (project) {
 				lambda
 			};
 
-			req.when('application/json').accepts({ template: '#/templates/passthrough' });
+			// only add passthrough if application/json doesn't exist for request
+			const requestTemplates = req.operation.apiGatewayIntegration.requestTemplates;
+			if (!requestTemplates.hasOwnProperty('application/json')) {
+				req.when('application/json').accepts({ template: '#/templates/passthrough' });
+			}
+
 			req.integrates({
 				type: gateway.constants.Lambda,
 				uri: uri(project.aws.region, arn),
