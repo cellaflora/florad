@@ -33,15 +33,25 @@ module.exports = function (project) {
 				lambda
 			};
 
-			req.when('application/json').accepts({ template: '#/templates/passthrough' });
+			// set default request template, if json content-type is not defined
+			const requestTemplates = req.operation.apiGatewayIntegration.requestTemplates;
+			if (!requestTemplates.hasOwnProperty('application/json')) {
+				req.when('application/json').accepts({ template: '#/templates/passthrough' });
+			}
+
 			req.integrates({
 				type: gateway.constants.Lambda,
 				uri: uri(project.aws.region, arn),
 			});
-			res.when('default').responds({
-				status: 200,
-				model: '#/definitions/Empty',
-			});
+
+			// set default response model, if response condition is not defined
+			const responses = req.operation.apiGatewayIntegration.responses;
+			if (!responses.hasOwnProperty('default')) {
+				res.when('default').responds({
+					status: 200,
+					model: '#/definitions/Empty',
+				});
+			}
 
 		};
 
