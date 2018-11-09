@@ -1,11 +1,12 @@
 {
-  "name": "flora",
+  "name": "@cellaflora/florad",
   "version": "0.5.10",
   "description": "",
   "main": "index.js",
+  "homepage": "https://github.com/cellaflora/florad",
   "repository": {
     "type": "git",
-    "url": "https://gitlab.cellaflora.com/internal/flora.git"
+    "url": "https://github.com/cellaflora/florad.git"
   },
   "bin": {
     "flora": "bin/flora.js"
