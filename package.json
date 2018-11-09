@@ -9,7 +9,7 @@
     "url": "https://github.com/cellaflora/florad.git"
   },
   "bin": {
-    "flora": "bin/flora.js"
+    "florad": "bin/florad.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
