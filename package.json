@@ -14,7 +14,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Cellaflora (jacob@cellaflora.com)",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "devDependencies": {},
   "dependencies": {
     "archiver": "^2.1.0",
